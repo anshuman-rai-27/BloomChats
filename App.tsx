@@ -26,7 +26,7 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
-import { decrypt, encrypt, generateKey } from './utils';
+import { className, decrypt, encrypt, generateKey } from './utils';
 
 
 type SectionProps = PropsWithChildren<{
@@ -46,12 +46,12 @@ function Section({children, title}: SectionProps): React.JSX.Element {
   function encryptg(){
     setData(encrypt(textField, key));
   }
-    console.log(data)
   function decryptg(){
     setDecryptData(decrypt(text1Field, key));
   }
+  console.log(process.env.API_CONVEX_DEPLOYMENT)
   return (
-    <View style={styles.sectionContainer}>
+    <View >
       <Text
         style={[
           styles.sectionTitle,
@@ -65,7 +65,7 @@ function Section({children, title}: SectionProps): React.JSX.Element {
       <Button onPress={()=>{
         encryptg();
       }} title="Encrypt"/>
-      <Text>Encrypted Text</Text>
+      <Text >Encrypted Text</Text>
       <Text>{data}</Text>
       <TextInput onChangeText={setText1Field}/>
       <Button onPress={()=>{

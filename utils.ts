@@ -1,5 +1,6 @@
 import { secretbox,randomBytes } from "tweetnacl";
 import {encodeUTF8, decodeBase64, decodeUTF8, encodeBase64 } from "tweetnacl-util";
+import tw from 'twrnc'
 
 
 const newNonce = () => randomBytes(secretbox.nonceLength);
@@ -40,3 +41,6 @@ export const decrypt = (messageWithNonce:any, key:string) => {
   const base64DecryptedMessage = encodeUTF8(decrypted);
   return JSON.parse(base64DecryptedMessage);
 };
+
+
+export const className = (className:string)=> tw`${className}`;
