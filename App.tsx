@@ -5,14 +5,16 @@
  * @format
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type {PropsWithChildren} from 'react';
 import {
+  Button,
   SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
+  TextInput,
   useColorScheme,
   View,
 } from 'react-native';
@@ -24,6 +26,8 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import { decrypt, encrypt, generateKey } from './utils';
+
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -31,6 +35,21 @@ type SectionProps = PropsWithChildren<{
 
 function Section({children, title}: SectionProps): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
+  const [data, setData] = useState("");
+  const [textField, setTextField] = useState("");
+  const [text1Field, setText1Field] = useState("");
+  const [decryptData, setDecryptData] = useState(""); 
+  const [key,setKey] = useState("");
+  useEffect(()=>{
+    setKey(generateKey());
+  },[])
+  function encryptg(){
+    setData(encrypt(textField, key));
+  }
+    console.log(data)
+  function decryptg(){
+    setDecryptData(decrypt(text1Field, key));
+  }
   return (
     <View style={styles.sectionContainer}>
       <Text
@@ -42,15 +61,19 @@ function Section({children, title}: SectionProps): React.JSX.Element {
         ]}>
         {title}
       </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
+      <TextInput onChangeText={setTextField}/>
+      <Button onPress={()=>{
+        encryptg();
+      }} title="Encrypt"/>
+      <Text>Encrypted Text</Text>
+      <Text>{data}</Text>
+      <TextInput onChangeText={setText1Field}/>
+      <Button onPress={()=>{
+        decryptg();
+      }} title="Decrypt"/>
+      <Text>Decrypt Text</Text>
+      <Text>{decryptData}</Text>
+      {children}
     </View>
   );
 }
@@ -63,36 +86,9 @@ function App(): React.JSX.Element {
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <Section title="life">
+
+    </Section>
   );
 }
 
