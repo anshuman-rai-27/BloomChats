@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "convex": "^1.16.4",
+    "convex-ents": "^0.11.0",
+    "convex-helpers": "^0.1.60",
     "react": "18.3.1",
     "react-native": "0.75.4",
     "react-native-get-random-values": "^1.11.0",

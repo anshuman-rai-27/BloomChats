@@ -3102,6 +3102,8 @@ __metadata:
     "@types/react-test-renderer": ^18.0.0
     babel-jest: ^29.6.3
     convex: ^1.16.4
+    convex-ents: ^0.11.0
+    convex-helpers: ^0.1.60
     eslint: ^8.19.0
     jest: ^29.6.3
     prettier: 2.8.8
@@ -4047,6 +4049,36 @@ __metadata:
   version: 2.0.0
   resolution: "convert-source-map@npm:2.0.0"
   checksum: 63ae9933be5a2b8d4509daca5124e20c14d023c820258e484e32dc324d34c2754e71297c94a05784064ad27615037ef677e3f0c00469fb55f409d2bb21261035
+  languageName: node
+  linkType: hard
+
+"convex-ents@npm:^0.11.0":
+  version: 0.11.0
+  resolution: "convex-ents@npm:0.11.0"
+  peerDependencies:
+    convex: ^1.13.0
+  checksum: a9e58dba551e543a50fa530fa83b373a4f726367d7b9a567fdf67cd8e73c5f6303eaaaaede4cda322f522509da11b334aa25a8ada1768f8ce8d587b354be331d
+  languageName: node
+  linkType: hard
+
+"convex-helpers@npm:^0.1.60":
+  version: 0.1.60
+  resolution: "convex-helpers@npm:0.1.60"
+  peerDependencies:
+    convex: ^1.13.0
+    hono: ^4.0.5
+    react: ^17.0.2 || ^18.0.0
+    zod: ^3.22.4
+  peerDependenciesMeta:
+    hono:
+      optional: true
+    react:
+      optional: true
+    zod:
+      optional: true
+  bin:
+    convex-helpers: bin.cjs
+  checksum: 3345e8a8235840ee42011289966e1c0d44230812ba0f57a0870711c339d346dc86a9b92539a28d43f6304cf5dbe9b417c8c3cd8949d43d2fff6373908768c400
   languageName: node
   linkType: hard
 
