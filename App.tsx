@@ -10,12 +10,27 @@ import {
   Text,
 } from 'react-native';
 import RootLayout from './_layout';
+import { SignIn } from './auth_components/SignIn';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { ChatComponent } from './auth_components/ChatComponent';
 
+export type RootStackParamList = {
+  Login:undefined;
+  Chat:undefined;
+}
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function App(): React.JSX.Element {
   return (
     <RootLayout>
-      <Text>Hello world</Text>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName='Login'>
+          <Stack.Screen name="Login" component={SignIn} />
+          <Stack.Screen name="Chat" component={ChatComponent} />
+        </Stack.Navigator>
+        </NavigationContainer>
     </RootLayout>
 
   );

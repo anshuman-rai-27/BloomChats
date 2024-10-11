@@ -4,12 +4,13 @@ import { v } from "convex/values";
 
 const schema = defineSchema({
     ...authTables,
-    profiles:defineTable({
-        name:v.string(),
-        description:v.string(),
-        imgUrl:v.optional(v.string()),
+    userPublicKey:defineTable({
+        publicKey:v.string(),
+        user:v.id('users')
+    }),
+    groupchats:defineTable({
         userId:v.id('users'),
-        groupId:v.array(v.id('groups'))
+        groupId:v.id('groups')
     }),
     messages:defineTable({
         from:v.id('users'),
@@ -18,15 +19,13 @@ const schema = defineSchema({
     }),
     sessions:defineTable({
         deviceId:v.string(),
-        user:v.id('users')
+        authSessionId:v.id('authSessions')
     }),
     groups:defineTable({
         name:v.string(),
         description:v.string(),
         isDm:v.boolean(),
         owner:v.id('users'),
-        users:v.array(v.id('users')),
-        messages:v.array(v.id('messages'))
     }) 
 })
 export default schema;
