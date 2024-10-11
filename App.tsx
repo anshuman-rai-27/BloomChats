@@ -9,14 +9,12 @@ import {
   StyleSheet,
   Text,
 } from 'react-native';
-import RootLayout from './_layout';
 
+import Login from './components/login';
 
 function App(): React.JSX.Element {
   return (
-    <RootLayout>
-      <Text>Hello world</Text>
-    </RootLayout>
+   <Login/>
 
   );
 }
