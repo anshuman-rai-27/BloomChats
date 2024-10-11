@@ -10,11 +10,16 @@
     "test": "jest"
   },
   "dependencies": {
+    "@auth/core": "0.36.0",
+    "@convex-dev/auth": "^0.0.72",
+    "@react-native-async-storage/async-storage": "^2.0.0",
     "convex": "^1.16.4",
     "convex-ents": "^0.11.0",
     "convex-helpers": "^0.1.60",
     "react": "18.3.1",
+    "react-dom": "^18.3.1",
     "react-native": "0.75.4",
+    "react-native-async-storage": "^0.0.1",
     "react-native-get-random-values": "^1.11.0",
     "react-native-securerandom": "^1.0.1",
     "tweetnacl": "^1.0.3",
