@@ -12,10 +12,11 @@ import {
 
 import Login from './components/login';
 import Register from './components/register';
+import Home from './components/homepage';
 
 function App(): React.JSX.Element {
   return (
-   <Register/>
+   <Home/>
 
   );
 }
