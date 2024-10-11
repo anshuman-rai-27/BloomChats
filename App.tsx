@@ -1,3 +1,4 @@
+
 /**
  * Sample React Native App
  * https://github.com/facebook/react-native
@@ -42,7 +43,6 @@ function App() {
 
   );
 }
-
 
 const styles = StyleSheet.create({
   sectionContainer: {
