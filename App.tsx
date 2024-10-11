@@ -11,10 +11,11 @@ import {
 } from 'react-native';
 
 import Login from './components/login';
+import Register from './components/register';
 
 function App(): React.JSX.Element {
   return (
-   <Login/>
+   <Register/>
 
   );
 }
