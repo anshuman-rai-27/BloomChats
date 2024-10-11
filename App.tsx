@@ -14,6 +14,7 @@ import { SignIn } from './auth_components/SignIn';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ChatComponent } from './auth_components/ChatComponent';
+import Home from './components/homepage';
 
 export type RootStackParamList = {
   Login:undefined;
@@ -22,7 +23,10 @@ export type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-function App(): React.JSX.Element {
+const UI = false;
+
+function App() {
+  if(!UI){
   return (
     <RootLayout>
       <NavigationContainer>
@@ -31,10 +35,14 @@ function App(): React.JSX.Element {
           <Stack.Screen name="Chat" component={ChatComponent} />
         </Stack.Navigator>
         </NavigationContainer>
-    </RootLayout>
+    </RootLayout>)
+  }
+  return (
+   <Home/>
 
   );
 }
+
 
 const styles = StyleSheet.create({
   sectionContainer: {
