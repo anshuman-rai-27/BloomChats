@@ -24,24 +24,19 @@ export type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-const UI = false;
 
 function App() {
-  if(!UI){
   return (
     <RootLayout>
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName='Login'>
+      <NavigationContainer >
+        <Stack.Navigator screenOptions={{
+          headerShown:false
+        }} initialRouteName='Login'>
           <Stack.Screen name="Login" component={SignIn} />
           <Stack.Screen name="Chat" component={ChatComponent} />
         </Stack.Navigator>
         </NavigationContainer>
     </RootLayout>)
-  }
-  return (
-   <Home/>
-
-  );
 }
 
 const styles = StyleSheet.create({
