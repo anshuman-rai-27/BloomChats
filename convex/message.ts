@@ -5,21 +5,16 @@ import { mutation, query } from "./_generated/server";
 export const getMessageByGroupId = query({
     args:{groupId:v.id("groups")},
     handler: async(ctx, args)=>{
-        return await ctx.db.query('messages').filter((q)=>q.eq(q.field('groupId'), args.groupId))
+        return await ctx.db.query('messages').filter((q)=>q.eq(q.field('groupId'), args.groupId)).collect();
+
     }
 })
 
 export const createMessage = mutation({
-    args:{content:v.string(), groupId:v.id('groups')},
+    args:{content:v.string(), groupId:v.id('groups'), from:v.id('users')},
     handler:async (ctx,args)=>{
-        const user = await ctx.auth.getUserIdentity();
-        if(!user){
-            //TODO: we will deal with this later
-            return;
-        }
-        const userId = await ctx.db.query('users').filter((q)=>q.eq(q.field('email'), user.email)).first();
         await ctx.db.insert('messages', {
-            from:userId!._id,
+            from:args.from,
             content:args.content,
             groupId:args.groupId
         })

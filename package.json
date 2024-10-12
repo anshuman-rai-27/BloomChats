@@ -15,6 +15,8 @@
     "@react-native-async-storage/async-storage": "^2.0.0",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.11.0",
+    "@stablelib/base64": "^2.0.0",
+    "@stablelib/utf8": "^2.0.0",
     "convex": "^1.16.4",
     "convex-ents": "^0.11.0",
     "convex-helpers": "^0.1.60",

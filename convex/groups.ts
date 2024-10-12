@@ -1,15 +1,12 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { DataModel } from "./_generated/dataModel";
 
 export const createGroup = mutation({
-    args:{name:v.string(), description:v.string(), isDm:v.boolean()},
+    args:{name:v.string(), description:v.string(), isDm:v.boolean(), email:v.string()},
+
     handler:async(ctx,args) =>{
-        const user = await ctx.auth.getUserIdentity();
-        if(!user){
-            //TODO: Need to do somethign about this
-            return;
-        }
-        const userId = await ctx.db.query('users').filter((q)=>q.eq(q.field('email'), user.email)).first();
+        const userId = await ctx.db.query('users').filter((q)=>q.eq(q.field('email'), args.email)).first();
         try {
             const groupId = await ctx.db.insert('groups', {
                  description:args.description,
@@ -21,42 +18,53 @@ export const createGroup = mutation({
                 userId:userId!._id,
                 groupId:groupId
             })
-            return {error:null}
+            return {data:{groupId:groupId},error:null}
         } catch (error) {
             console.error(error);
-            return {error}
+            return {data:null,error}
         }
     }
 })
 
-export const getGroupWithUserId = query({
-    args:{},
+export const getGroupWithEmail = query({
+    args:{email:v.string()},
     handler: async (ctx, args) =>{
-        const user = await ctx.auth.getUserIdentity();
-        if(!user){
-            //TODO: Need to do somethign about this
-            return;
-        }
-        const userId = await ctx.db.query('users').filter((q)=>q.eq(q.field('email'), user.email)).first();
+        const userId = await ctx.db.query('users').filter((q)=>q.eq(q.field('email'), args.email)).first();
         try{
             const data = await ctx.db.query('groupchats').filter((q)=>q.eq(q.field('userId'), userId!._id)).collect()
-            return {data, error:null};
+            const af = [];
+            for(let group in data){
+                af.push(await ctx.db.get(data[group].groupId))
+            }
+            return {data:af, error:null};
         }catch(error){
             console.error(error);
             return {data:null, error}
         }
     }
 })
-
-export const joinGroup = mutation({
+export const getGroup = query({
     args:{groupId:v.id('groups')},
-    handler:async (ctx, args)=>{
-        const user = await ctx.auth.getUserIdentity();
-        if(!user){
-            //TODO: Need to do somethign about this
-            return;
+    handler: async(ctx,args) =>{
+        try {
+            const groupInfo = await ctx.db.get(args.groupId)
+            const momo = await ctx.db.query('groupchats').filter((q)=>q.eq(q.field('groupId'), groupInfo!._id)).collect();
+            let members:any = []
+            for(let i = 0 ; i < momo.length ; i++){
+                members.push(await ctx.db.get(momo[i].userId));
+            }
+            
+            return {data:{groupInfo,members}, error:null}
+        } catch (error) {
+            console.error(error);
+            return {data:null, error}
         }
-        const userId = await ctx.db.query('users').filter((q)=>q.eq(q.field('email'), user.email)).first();
+    }
+})
+export const joinGroup = mutation({
+    args:{groupId:v.id('groups'), email:v.string()},
+    handler:async (ctx, args)=>{
+        const userId = await ctx.db.query('users').filter((q)=>q.eq(q.field('email'), args.email)).first();
         try {
             await ctx.db.insert('groupchats',{
                 userId:userId!._id,
