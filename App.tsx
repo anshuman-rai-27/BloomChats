@@ -12,34 +12,37 @@ import {
 } from 'react-native';
 import RootLayout from './_layout';
 import { SignIn } from './auth_components/SignIn';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+// import { NavigationContainer } from '@react-navigation/native';
+// import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ChatComponent } from './auth_components/ChatComponent';
 import Home from './components/homepage';
+import Login from './components/login';
 
-export type RootStackParamList = {
-  Login:undefined;
-  Chat:undefined;
-}
+import Chatbox from './components/chatbox';
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
+// export type RootStackParamList = {
+//   Login:undefined;
+//   Chat:undefined;
+// // }
 
-const UI = false;
+// const Stack = createNativeStackNavigator<RootStackParamList>();
+
+// const UI = false;
 
 function App() {
-  if(!UI){
+  // if(!UI){
+  // return (
+  //   <RootLayout>
+  //     <NavigationContainer>
+  //       <Stack.Navigator initialRouteName='Login'>
+  //         <Stack.Screen name="Login" component={SignIn} />
+  //         <Stack.Screen name="Chat" component={ChatComponent} />
+  //       </Stack.Navigator>
+  //       </NavigationContainer>
+  //   </RootLayout>)
+  // }
   return (
-    <RootLayout>
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName='Login'>
-          <Stack.Screen name="Login" component={SignIn} />
-          <Stack.Screen name="Chat" component={ChatComponent} />
-        </Stack.Navigator>
-        </NavigationContainer>
-    </RootLayout>)
-  }
-  return (
-   <Home/>
+   <Chatbox/>
 
   );
 }
