@@ -24,14 +24,17 @@ const Chatbox = () => {
   ];
 
   // State to manage the current theme and message input
-  const [selectedTheme, setSelectedTheme] = useState(themes[0]); // Default theme is now Orange
+  const [selectedTheme, setSelectedTheme] = useState(themes[1]); // Default theme is now Orange
   const [isModalVisible, setModalVisible] = useState(false); // For the theme selector modal
   const [message, setMessage] = useState(''); // State for message input
-  const [messages, setMessages] = useState([ // State to manage messages
+
+  const messages = [
+
     { id: '1', text: 'Hey, how are you?', sender: 'me' },
     { id: '2', text: 'I am good, thanks! How about you?', sender: 'them' },
     { id: '3', text: 'What are you up to?', sender: 'me' },
     { id: '4', text: 'Just working on some projects.', sender: 'them' },
+
   ]);
 
   const renderMessage = ({ item }) => (
@@ -53,7 +56,9 @@ const Chatbox = () => {
   const sendMessage = () => {
     if (message.trim()) {
       const newMessage = { id: Date.now().toString(), text: message, sender: 'me' };
+
       setMessages((prevMessages) => [...prevMessages, newMessage]); // Update messages state
+
       setMessage(''); // Clear the input field after sending
     }
   };
@@ -83,6 +88,7 @@ const Chatbox = () => {
             />
             <Text style={styles.userName}>John Doe</Text>
           </View>
+
 
           <View style={styles.userInfo}>
             <Image
@@ -168,6 +174,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     paddingRight: 0,
+
     justifyContent: 'center',
     paddingTop:2,
   },
@@ -178,6 +185,7 @@ const styles = StyleSheet.create({
   },
   userImage: {
     width: 30,
+
     height: 30,
     borderRadius: 20,
     marginRight:10,
@@ -186,7 +194,11 @@ const styles = StyleSheet.create({
   userName: {
     color: '#fff',
     fontSize: 18,
+
     marginRight: 50,
+
+    marginLeft: 10,
+
   },
   threeDotButton: {
     padding: 10,
@@ -229,10 +241,12 @@ const styles = StyleSheet.create({
   },
   triangleTheirMessage: {
     position: 'absolute',
-    top: 1,
+
+    top:1,
     left: -3,
     width: 0,
-    height: 0,
+    height: 2,
+
     borderLeftWidth: 10,
     borderLeftColor: 'transparent',
     borderRightWidth: 10,
@@ -252,7 +266,6 @@ const styles = StyleSheet.create({
   iconImage: {
     width: 20,
     height: 20,
-    
   },
 
   // Modal styles
@@ -260,22 +273,23 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Semi-transparent background for modal
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContainer: {
-    backgroundColor: 'black',
-    width: '80%',
-    borderRadius: 10,
+    width: 250,
     padding: 20,
-    elevation: 5,
+    backgroundColor: '#000',
+    borderRadius: 10,
+    alignItems: 'center',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 15,
+    marginBottom: 10,
   },
   modalOption: {
-    paddingVertical: 10,
+    marginVertical: 5,
+    width: '100%',
   },
   themeOption: {
     flexDirection: 'row',
@@ -291,29 +305,34 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 
-  // Message input styles
+  // Input styles
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 10,
+    paddingVertical: 10,
   },
   messageInput: {
     flex: 1,
+    height: 40,
     borderWidth: 1,
     borderRadius: 20,
-    padding: 10,
+    paddingHorizontal: 10,
     color: '#fff',
+    backgroundColor: '#000',
+    marginBottom: 15,
   },
   sendButton: {
+    marginLeft: 10,
     borderRadius: 20,
     paddingVertical: 10,
-    paddingHorizontal: 15,
-    marginLeft: 10,
+    paddingHorizontal: 20,
+    marginBottom: 15,
   },
   sendButtonText: {
     color: '#fff',
-    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
 
 export default Chatbox;
+
