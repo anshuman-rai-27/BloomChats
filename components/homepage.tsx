@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(51, 51, 51, 0.7)', // Transparent background
-    padding: 15,
+    padding: 10, // Adjusted padding for more space
     borderRadius: 10,
     marginBottom: 10,
   },
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    marginRight: 15,
+    marginRight: 10, // Reduced space between image and text
   },
   contactName: {
     color: '#fff',

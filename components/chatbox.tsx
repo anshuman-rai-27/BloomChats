@@ -18,7 +18,6 @@ const Chatbox = () => {
   const themes = [
     { id: 1, name: 'Orange Theme', backgroundImage: require('../assets/images/chat1.jpg'), myBubble: '#DD651B', theirBubble: '#333' },
     { id: 2, name: 'Violet Theme', backgroundImage: require('../assets/images/chat_violet.jpg'), myBubble: '#6A0DAD', theirBubble: '#333' },
-   
     { id: 3, name: 'Minimal Theme', backgroundImage: require('../assets/images/chat_white.jpg'), myBubble: '#333', theirBubble: '#000000' },
     { id: 4, name: 'Yellow Theme', backgroundImage: require('../assets/images/chat_yellow.jpg'), myBubble: '#EAB613', theirBubble: '#333' },
     { id: 5, name: 'Pink Theme', backgroundImage: require('../assets/images/chat_pink.jpg'), myBubble: '#DA70A5', theirBubble: '#333' },
@@ -30,11 +29,13 @@ const Chatbox = () => {
   const [message, setMessage] = useState(''); // State for message input
 
   const messages = [
+
     { id: '1', text: 'Hey, how are you?', sender: 'me' },
     { id: '2', text: 'I am good, thanks! How about you?', sender: 'them' },
     { id: '3', text: 'What are you up to?', sender: 'me' },
     { id: '4', text: 'Just working on some projects.', sender: 'them' },
-  ];
+
+  ]);
 
   const renderMessage = ({ item }) => (
     <View style={item.sender === 'me' ? [styles.myMessageBubble, { backgroundColor: selectedTheme.myBubble }] : [styles.theirMessageBubble, { backgroundColor: selectedTheme.theirBubble }]}>
@@ -55,7 +56,9 @@ const Chatbox = () => {
   const sendMessage = () => {
     if (message.trim()) {
       const newMessage = { id: Date.now().toString(), text: message, sender: 'me' };
-      messages.push(newMessage);
+
+      setMessages((prevMessages) => [...prevMessages, newMessage]); // Update messages state
+
       setMessage(''); // Clear the input field after sending
     }
   };
@@ -84,6 +87,14 @@ const Chatbox = () => {
               style={styles.userImage}
             />
             <Text style={styles.userName}>John Doe</Text>
+          </View>
+
+
+          <View style={styles.userInfo}>
+            <Image
+              source={require('../assets/images/videocall.png')} // Replace with the video call image path
+              style={styles.userImage}
+            />
           </View>
 
           {/* Three-Dot Button for Theme Selection */}
@@ -163,7 +174,9 @@ const styles = StyleSheet.create({
   },
   backButton: {
     paddingRight: 0,
-    justifyContent:'center',
+
+    justifyContent: 'center',
+    paddingTop:2,
   },
   userInfo: {
     flexDirection: 'row',
@@ -175,11 +188,17 @@ const styles = StyleSheet.create({
 
     height: 30,
     borderRadius: 20,
+    marginRight:10,
+
   },
   userName: {
     color: '#fff',
     fontSize: 18,
+
+    marginRight: 50,
+
     marginLeft: 10,
+
   },
   threeDotButton: {
     padding: 10,
@@ -222,10 +241,12 @@ const styles = StyleSheet.create({
   },
   triangleTheirMessage: {
     position: 'absolute',
+
     top:1,
     left: -3,
     width: 0,
     height: 2,
+
     borderLeftWidth: 10,
     borderLeftColor: 'transparent',
     borderRightWidth: 10,
@@ -314,3 +335,4 @@ const styles = StyleSheet.create({
 });
 
 export default Chatbox;
+
