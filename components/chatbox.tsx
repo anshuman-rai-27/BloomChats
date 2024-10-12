@@ -25,7 +25,7 @@ const Chatbox = () => {
   ];
 
   // State to manage the current theme and message input
-  const [selectedTheme, setSelectedTheme] = useState(themes[1]); // Default theme is now Orange
+  const [selectedTheme, setSelectedTheme] = useState(themes[0]); // Default theme is now Orange
   const [isModalVisible, setModalVisible] = useState(false); // For the theme selector modal
   const [message, setMessage] = useState(''); // State for message input
 
@@ -84,6 +84,14 @@ const Chatbox = () => {
               style={styles.userImage}
             />
             <Text style={styles.userName}>John Doe</Text>
+          </View>
+{/* video call............. */}
+          <View style={styles.videoCallIcon}>
+            <Image
+              source={require('../assets/images/video_call.png')} // Replace with the user image path
+              style={styles.userImage}
+            />
+           
           </View>
 
           {/* Three-Dot Button for Theme Selection */}
@@ -155,6 +163,12 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
   },
+
+  videoCallIcon: {
+    marginLeft: 8,
+    marginRight: -70,
+   
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -163,12 +177,15 @@ const styles = StyleSheet.create({
   },
   backButton: {
     paddingRight: 0,
+    paddingTop: 2,
+    marginRight:-20,
     justifyContent:'center',
   },
   userInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginLeft: -5,
+    marginLeft: -35,
+    marginRight:20,
   },
   userImage: {
     width: 30,
@@ -245,6 +262,7 @@ const styles = StyleSheet.create({
   iconImage: {
     width: 20,
     height: 20,
+    
   },
 
   // Modal styles
