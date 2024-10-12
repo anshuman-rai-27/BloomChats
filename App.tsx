@@ -26,12 +26,13 @@ import GroupComponent from './auth_components/GroupComponent';
 import Testing from './auth_components/Testing';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
+import Register from './components/register';
 
-<<<<<<< Updated upstream
 export type RootStackParamList = {
   Login: undefined;
   Chat: {email:string};
   Group: undefined;
+  Register:undefined;
   GroupChat: { groupId: Id<'groups'>; email:string};
   Test:undefined;
 }
@@ -57,14 +58,6 @@ export type RootStackParamList = {
 //     </RootLayout>)
 // =======
 const Stack = createNativeStackNavigator<RootStackParamList>();
-=======
-import Chatbox from './components/chatbox';
-import ChatScreen from './components/chatScreen';
-// export type RootStackParamList = {
-//   Login:undefined;
-//   Chat:undefined;
-// // }
->>>>>>> Stashed changes
 
 // // const UI = false;
 
@@ -86,7 +79,8 @@ function App() {
         <Stack.Navigator screenOptions={{
           headerShown: false
         }} initialRouteName='Login'>
-          <Stack.Screen name="Login" component={SignIn} />
+          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="Register" component={Register} />
           <Stack.Screen name="Chat" component={ChatComponent} />
           <Stack.Screen name="Test" component={Testing} />
           <Stack.Screen name="GroupChat" component={GroupComponent}/>
