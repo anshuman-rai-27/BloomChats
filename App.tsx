@@ -16,12 +16,21 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ChatComponent } from './auth_components/ChatComponent';
 import Home from './components/homepage';
 
+<<<<<<< Updated upstream
 export type RootStackParamList = {
   Login:undefined;
   Chat:undefined;
 }
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+=======
+import Chatbox from './components/chatbox';
+import ChatScreen from './components/chatScreen';
+// export type RootStackParamList = {
+//   Login:undefined;
+//   Chat:undefined;
+// // }
+>>>>>>> Stashed changes
 
 const UI = false;
 
