@@ -3,23 +3,23 @@ import { mutation, query } from "./_generated/server"
 
 
 export const getUser = query({
-    args:{},
+    args:{email:v.string()},
     handler:async (ctx, args)=>{
-        const user = await ctx.auth.getUserIdentity();
-        if(!user){
-            return;
-        }
-        return await ctx.db.query('users').filter((q)=>q.eq(q.field('email'), user.email)).collect();
+        return await ctx.db.query('users').filter((q)=>q.eq(q.field('email'), args.email)).first();
     }
 })
-export const getPublicKey = mutation({
+
+export const getUserByUserId = query({
+    args:{userId:v.id('users')},
+    handler:async(ctx,args)=>{
+        return await ctx.db.get(args.userId);
+    }
+})
+
+export const setPublicKey = mutation({
     args:{email:v.string(), publicKey:v.string()},
     handler:async(ctx,args)=>{
         const userInfo = await ctx.db.query('users').filter((q)=>q.eq(q.field('email'), args.email)).first();
-        const userPublicKey = await ctx.db.query('userPublicKey').filter((q)=>q.eq(q.field('user'), userInfo!._id)).first()
-        if(userPublicKey){
-            return userPublicKey.publicKey;
-        }
         await ctx.db.insert('userPublicKey',{
             publicKey:args.publicKey,
             user:userInfo!._id
@@ -27,18 +27,12 @@ export const getPublicKey = mutation({
         return args.publicKey
     }
 })
-// export const createUser = mutation({
-//     args:{email:v.string(), password:v.string(), name:v.string(), publicKey:v.string(), deviceId:v.string()},
-//     handler:async (ctx,args) =>{
 
-//         const profileId = await ctx.db.insert('profiles',{
-//             name:args.name,
-//             description:""
-//         })
-//         await ctx.table("users").insert({
-//             email:args.email,
-//             password:args.password,
-//             publicKey:args.publicKey
-//         })
-//     }
-// })
+export const getPublicKey = mutation({
+    args:{email:v.string()},
+    handler:async(ctx,args)=>{
+        const userInfo = await ctx.db.query('users').filter((q)=>q.eq(q.field('email'), args.email)).first();
+        const publicKey = await ctx.db.query('userPublicKey').filter((q)=>q.eq(q.field('user'), userInfo!._id)).first();
+        return publicKey!.publicKey
+    }
+})
