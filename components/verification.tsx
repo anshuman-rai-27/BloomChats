@@ -16,10 +16,19 @@ const width = Dimensions.get('screen').width
 export const VerificationScreen = ({ navigation, route }: { navigation: NavigationProp<any>, route: RouteProp<any> }) => {
     const [code, setCode] = useState<string>("");
     const { signIn } = useAuthActions();
+    const [err,setErr] = useState<string>("");
+    
     const setPublicKey = useMutation(api.users.setPublicKey);
+    const checkVerificationCode = useMutation(api.users.checkVerificationCode)
+    
     async function handleSubmit() {
         const email = route.params?.email
         const password = route.params?.password
+        const type = route.params?.type
+        if(!(await checkVerificationCode({email:email, code:code, type:type}))){
+            setErr('Error: Invalid Code');
+            return;
+        }
         if (route.params!.type === "signIn") {
             try {
                 await signIn("password", { email: email, password: password, flow: "signIn" })
@@ -29,11 +38,12 @@ export const VerificationScreen = ({ navigation, route }: { navigation: Navigati
                 console.error(error);
             }
         } else {
-            const userKeys = generateKeyPair
-                ();
+            const userKeys = generateKeyPair();
             try {
                 await signIn("password", { email, password, flow: "signUp" })
                 await AsyncStorage.setItem('privKey', encodeBase64(userKeys.secretKey));
+                await AsyncStorage.setItem('email', email);
+                await AsyncStorage.setItem(email, encodeBase64(userKeys.secretKey));
                 await setPublicKey({ email: email, publicKey: encodeBase64(userKeys.publicKey) });
                 navigation.navigate('Chat', { email: email })
             } catch (error) {
@@ -68,7 +78,7 @@ export const VerificationScreen = ({ navigation, route }: { navigation: Navigati
                     borderRadius: 10,
                     alignItems: 'center',
                     marginBottom: 20,
-                }} onPress={() => { }}>
+                }} onPress={handleSubmit}>
                     <Text style={{
                         color: '#fff',
                         fontSize: 16,

@@ -13,7 +13,7 @@ import { generateKeyPair } from '../utils';
 import { encodeBase64 } from 'tweetnacl-util';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../convex/_generated/api';
-import { useMutation } from 'convex/react';
+import { useAction, useMutation } from 'convex/react';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../App';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -27,7 +27,7 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
-  const createVerificationCode = useMutation(api.users.createVerificationCode);
+  const createVerificationCode = useAction(api.users.sendEmail);
   const handleRegister = async () => {
     if (password.localeCompare(confirmPassword) !== 0) {
       setError('Error: Password not match');
@@ -37,6 +37,7 @@ const Register = () => {
       email:email,
       type:'signUp'
     })
+    navigation.navigate('Verification', {email,password, type:'signUp'})
   };
 
   return (

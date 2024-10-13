@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { RootStackParamList } from '../App';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useConvexAuth, useMutation } from 'convex/react';
+import { useAction, useConvexAuth, useMutation } from 'convex/react';
 import { api } from '../convex/_generated/api';
 
 type loginScreenProp = NativeStackNavigationProp<RootStackParamList, "Login">
@@ -35,13 +35,13 @@ const Login = () => {
   }
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const createVerificationCode = useMutation(api.users.createVerificationCode);
+  const createVerificationCode = useAction(api.users.sendEmail);
   const handleLogin = async () => {
     await createVerificationCode({
       email:email,
-      type:'signUp'
+      type:'signIn'
     })
-    navigation.navigate('Verification',{email:email});
+    navigation.navigate('Verification',{email:email, password:password, type:'signIn'});
   };
 
   return (

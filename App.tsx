@@ -35,7 +35,7 @@ export type RootStackParamList = {
   Chat: { email: string };
   Group: undefined;
   Register: undefined;
-  Verification:{email:string},
+  Verification:{email:string, password:string, type:'signUp'|'signIn'},
   GroupChat: { groupId: Id<'groups'>; email: string };
   Test: undefined;
 }
@@ -49,7 +49,7 @@ function App() {
       <NavigationContainer >
         <Stack.Navigator screenOptions={{
           headerShown: false
-        }} initialRouteName='Verification'>
+        }} initialRouteName='Login'>
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Register" component={Register} />
           <Stack.Screen name="Chat" component={ChatScreen} />
