@@ -14,36 +14,32 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
+import { NavigationProp, RouteProp, useNavigation } from '@react-navigation/native';
+import { useConvexAuth, useQuery } from 'convex/react';
+import { api } from '../convex/_generated/api';
+import { RootStackParamList } from '../App';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 const { width } = Dimensions.get('window');
 
-interface Chat {
-  id: string;
-  name: string;
-  message: string;
-  time: string;
-  avatar: string;
-}
+type chatScreenProp = NativeStackNavigationProp<RootStackParamList, "Chat">
 
-const initialChats: Chat[] = [
-  { id: '1', name: 'Tamuna12', message: 'You: ❤️', time: '12:21 PM', avatar: 'https://via.placeholder.com/50' },
-  { id: '2', name: 'George9', message: 'Yes I agree with your suggestion and...', time: '12:21 PM', avatar: 'https://via.placeholder.com/50' },
-  { id: '3', name: 'George', message: 'Yes I agree with your suggestion and...', time: '12:21 PM', avatar: 'https://via.placeholder.com/50' },
-  { id: '4', name: 'Nick', message: 'You: How are you?', time: '12:22 PM', avatar: 'https://via.placeholder.com/50' },
-  { id: '5', name: 'Anna', message: 'You: How are you? 😁', time: '12:21 PM', avatar: 'https://via.placeholder.com/50' },
-  { id: '6', name: 'Anya', message: 'Yes I agree with your suggestion and...', time: '12:21 PM', avatar: 'https://via.placeholder.com/50' },
-];
-
-const ChatScreen: React.FC = () => {
-  const [chats, setChats] = useState<Chat[]>(initialChats);
+const ChatScreen = ({ route}:{ route:RouteProp<any>}) => {
+  const [chats, setChats] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-
-  const filteredChats = chats.filter((chat) =>
+  const navigation = useNavigation<chatScreenProp>();
+  const user = useQuery(api.users.getUser,{
+    email:route.params!.email
+  })
+  const group = useQuery(api.groups.getGroupWithEmail,{
+    email:route.params!.email
+  })
+  const filteredChats = chats.filter((chat:any) =>
     chat.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const deleteChat = (id: string) => {
-    setChats((prev) => prev.filter((chat) => chat.id !== id));
+    setChats((prev:any) => prev.filter((chat:any) => chat._id !== id));
   };
 
   const handleLongPress = (id: string) => {
@@ -79,24 +75,29 @@ const ChatScreen: React.FC = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    
     Animated.timing(fadeAnim, {
       toValue: 1, // Final opacity value
       duration: 300,
       useNativeDriver: true,
     }).start();
   }, []);
-
-  const renderChatItem = ({ item }: { item: Chat }) => (
+  useEffect(()=>{
+    setChats(group?.data ?? [])
+  },[group])
+  const renderChatItem = ({ item }: { item: any }) => (
     <TouchableOpacity
-      onLongPress={() => handleLongPress(item.id)}
+      
+      onLongPress={() => handleLongPress(item._id)}
+      onPress={()=>{
+        navigation.navigate('GroupChat', {groupId:item._id, email:route.params?.email})
+      }}
       style={styles.chatItem}
     >
-      <Image source={{ uri: item.avatar }} style={styles.avatar} />
+      <Image source={{ uri: item.avatar ?? "https://via.placeholder.com/50" }} style={styles.avatar} />
       <View style={styles.chatDetails}>
         <Text style={styles.chatName}>{item.name}</Text>
-        <Text style={styles.chatMessage}>{item.message}</Text>
       </View>
-      <Text style={styles.time}>{item.time}</Text>
     </TouchableOpacity>
   );
 
@@ -105,7 +106,7 @@ const ChatScreen: React.FC = () => {
       {/* Header */}
       <View style={styles.header}>
         <Image source={{ uri: 'https://via.placeholder.com/50' }} style={styles.profilePic} />
-        <Text style={styles.greeting}>Welcome, Mariam!</Text>
+        <Text style={styles.greeting}>Welcome, {user?.name ?? "User"}</Text>
         <Icon name="bell-outline" size={24} color="#FFA500" />
       </View>
 
@@ -125,7 +126,7 @@ const ChatScreen: React.FC = () => {
       <FlatList
         data={filteredChats}
         renderItem={renderChatItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         contentContainerStyle={styles.chatList}
       />
 
