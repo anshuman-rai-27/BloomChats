@@ -16,6 +16,21 @@ export const getUserByUserId = query({
     }
 })
 
+
+export const createVerificationCode = mutation({
+    args:{email:v.string(), type:v.union(v.literal("signIn"), v.literal('signUp'))},
+    handler:async (ctx,args)=>{
+        
+    }
+})
+
+export const checkVerificationCode = mutation({
+    args:{email:v.string(), code:v.string(), type:v.union(v.literal("signIn"), v.literal('signUp'))},
+    handler:async (ctx,args) =>{
+        
+    }
+})
+
 export const setPublicKey = mutation({
     args:{email:v.string(), publicKey:v.string()},
     handler:async(ctx,args)=>{
