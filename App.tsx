@@ -15,11 +15,13 @@ import { SignIn } from './auth_components/SignIn';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ChatComponent } from './auth_components/ChatComponent';
+import CallPage from './components/call';
 import Home from './components/homepage';
 
 export type RootStackParamList = {
   Login:undefined;
   Chat:undefined;
+  CallPage:undefined;
 }
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -34,6 +36,7 @@ function App() {
         }} initialRouteName='Login'>
           <Stack.Screen name="Login" component={SignIn} />
           <Stack.Screen name="Chat" component={ChatComponent} />
+          <Stack.Screen name="CallPage" component={CallPage} />
         </Stack.Navigator>
         </NavigationContainer>
     </RootLayout>)
