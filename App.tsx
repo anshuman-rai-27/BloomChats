@@ -15,6 +15,7 @@ import { SignIn } from './auth_components/SignIn';
 // import { NavigationContainer } from '@react-navigation/native';
 // import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { ChatComponent } from './auth_components/ChatComponent';
+import CallPage from './components/call';
 import Home from './components/homepage';
 import Login from './components/login';
 
@@ -29,6 +30,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import Register from './components/register';
 
 export type RootStackParamList = {
+  CallPage:undefined;
   Login: undefined;
   Chat: {email:string};
   Group: undefined;
@@ -82,8 +84,10 @@ function App() {
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Register" component={Register} />
           <Stack.Screen name="Chat" component={ChatComponent} />
+          <Stack.Screen name="CallPage" component={CallPage} />
           <Stack.Screen name="Test" component={Testing} />
           <Stack.Screen name="GroupChat" component={GroupComponent}/>
+
         </Stack.Navigator>
       </NavigationContainer>
     </RootLayout>)
