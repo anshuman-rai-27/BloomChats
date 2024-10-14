@@ -7,6 +7,14 @@
 <key>NSMicrophoneUsageDescription</key>
 <string>We need to use the microphone</string>
 
+<!-- ............................added for image selection;; -->
+
+<key>NSCameraUsageDescription</key>
+<string>Your message to explain why you need camera access</string>
+<key>NSPhotoLibraryUsageDescription</key>
+<string>Your message to explain why you need photo library access</string>
+ <!-- ............................................................................................. -->
+
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
