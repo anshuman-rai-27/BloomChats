@@ -32,7 +32,7 @@ import ZegoUIKitPrebuiltCallService, {
 } from '@zegocloud/zego-uikit-prebuilt-call-rn';
 // import KeyCenter from "./KeyCenter";
 
-export default function CallPage(props) {
+export default function CallPage({navigation, route}) {
   const prebuiltRef = useRef();
   randomUserID = String(Math.floor(Math.random() * 100000));
 
@@ -42,7 +42,10 @@ export default function CallPage(props) {
         console.log('CallPage cleanup on unmount');
     };
 }, []);
-
+  const groupId = route.params.groupId
+  const email = route.params.email
+  const name = route.params.name
+  console.log("groupId:",groupId, " email:", email, " name", name)
   // const { route } = props;
   // const { params } = route;
   // const { userID, userName } = params;
@@ -52,9 +55,9 @@ export default function CallPage(props) {
         ref={prebuiltRef}
         appID={2106807763}
         appSign={'3601ef63bef061e250d607571df00dea5137a324c008768392e903c59f8ba28a'}
-        userID={randomUserID}
-        userName={'user_' + randomUserID}
-        callID='rn12345678'
+        userID={email}
+        userName={"lol"}
+        callID={groupId}
 
         config={{
           // ...ONE_ON_ONE_VOICE_CALL_CONFIG,
@@ -72,7 +75,7 @@ export default function CallPage(props) {
           onCallEnd: (callID, reason, duration) => {
             console.log('########CallPage onCallEnd');
             ZegoUIKitPrebuiltCallService.hangUp();
-            props.navigation.navigate('Login');
+            navigation.navigate('GroupChat', {groupId, email});
           },
           timingConfig: {
             isDurationVisible: true,
@@ -90,14 +93,14 @@ export default function CallPage(props) {
           },
           onWindowMinimized: () => {
             console.log('[Demo]CallPage onWindowMinimized');
-            props.navigation.navigate('Login');
+            navigation.navigate('GroupChat',{groupId, email});
           },
           onWindowMaximized: () => {
             console.log('[Demo]CallPage onWindowMaximized');
             props.navigation.navigate('CallPage', {
-              userID: userID,
-              userName: userName,
-              callID: 'rn12345678',
+              userID: email,
+              userName: name ?? email,
+              callID: groupId,
             });
           },
         }}

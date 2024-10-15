@@ -81,7 +81,7 @@ const Login = () => {
           }}>
             <Text style={styles.signUp}>Sign Up</Text>
           </TouchableOpacity>
-        </View></>) : (<Text>Loading</Text>)}
+        </View></>) : (<Text style={styles.title}>Loading</Text>)}
     </AuthComponent>
   );
 };

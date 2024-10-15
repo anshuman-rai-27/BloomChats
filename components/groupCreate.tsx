@@ -3,15 +3,17 @@ import { View, Text, TextInput, FlatList, Image, TouchableOpacity, StyleSheet, D
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import { NavigationProp, RouteProp } from '@react-navigation/native';
 import { launchImageLibrary } from 'react-native-image-picker';
+import { api } from '../convex/_generated/api';
+import { useAction, useMutation, useQuery } from 'convex/react';
 
 const { width } = Dimensions.get('window');
 
 // Sample user data (the creator of the group)
-const sampleUser = {
+const sampleUserData = {
   id: "0",
   name: "Me",
   email: "john.doe@example.com",
-  avatar: "https://via.placeholder.com/50", 
+  avatar: "https://via.placeholder.com/50",
 };
 
 // Sample contacts data
@@ -38,29 +40,50 @@ const sampleContacts = [
 
 export default function GroupComponent({ navigation, route }: { navigation: NavigationProp<any>, route: RouteProp<any> }) {
   const [groupName, setGroupName] = useState('');
-  const [contacts, setContacts] = useState(sampleContacts); // Sample contacts data
+  const [contacts, setContacts] = useState<any>(sampleContacts); // Sample contacts data
   const [selectedContacts, setSelectedContacts] = useState<any[]>([]); // State for selected contacts
+  const [image, setImage] = useState<any>();
   const [groupImage, setGroupImage] = useState<string>('https://via.placeholder.com/100'); // Default group image
+  const [sampleUser, setSampleUser] = useState<any>([])
+  const user = useQuery(api.users.getUser, {
+    email: route.params!.email
+  })
+  const users = useQuery(api.users.getAllUser);
+
+  const getImage = useAction(api.message.getUrluploadFile)
+  const uploadImage = useAction(api.message.getUploadUrl)
+  const createGroup = useMutation(api.groups.createGroup);
+  const joinGroup = useMutation(api.groups.joinGroup);
 
 
-// ...............................................Group>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
- 
+
+  // >>>>>>>>>> Setting Group Data
   useEffect(() => {
-    setSelectedContacts([sampleUser]); 
-  }, []);
+    setContacts(users)
+  }, [users])
+  useEffect(() => {
+    console.log(user)
+    setSampleUser(user)
+  }, [user])
+
+  // ...............................................Group>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  console.log(sampleUser)
+  useEffect(() => {
+    setSelectedContacts([sampleUser]);
+  }, [sampleUser]);
 
   // Handle contact selection
   const handleSelectContact = (contact: any) => {
     setSelectedContacts([...selectedContacts, contact]);
-    setContacts(contacts.filter((c) => c.id !== contact.id)); // Remove the selected contact from the contacts list
+    setContacts(contacts.filter((c: any) => c._id !== contact._id)); // Remove the selected contact from the contacts list
   };
 
   // Handle removing selected contact
   const handleRemoveContact = (contact: any) => {
-    if (contact.id === sampleUser.id) {
+    if (contact._id === sampleUser._id) {
       return; // Don't allow removing the user (creator) from the selected contacts
     }
-    setSelectedContacts(selectedContacts.filter((c) => c.id !== contact.id)); // Remove contact from selected
+    setSelectedContacts(selectedContacts.filter((c: any) => c._id !== contact._id)); // Remove contact from selected
     setContacts([...contacts, contact]); // Add contact back to the contacts list
   };
 
@@ -77,15 +100,16 @@ export default function GroupComponent({ navigation, route }: { navigation: Navi
           console.log('User cancelled image picker');
           return;
         }
-        
+
         // Check for any errors in response
         if (response.errorCode) {
           console.log('ImagePicker Error: ', response.errorMessage); // Log error message
           return;
         }
-        
+        console.log(response);
         // Check if assets are available and set the image
         if (response.assets && response.assets.length > 0) {
+          setImage(response.assets[0])
           const source = response.assets[0].uri; // Get the image URI
           if (source) {
             setGroupImage(source); // Set the selected image
@@ -94,11 +118,10 @@ export default function GroupComponent({ navigation, route }: { navigation: Navi
       }
     );
   };
-  
-  // ...........................................................Group Cretion ........................
 
+  // ...........................................................Group Cretion ........................
   // Handle group creation
-  const handleCreateGroup = () => {
+  const handleCreateGroup = async () => {
     if (!groupName.trim()) {
       Alert.alert('Group Creation', 'Please enter a group name.');
       return;
@@ -107,28 +130,64 @@ export default function GroupComponent({ navigation, route }: { navigation: Navi
       Alert.alert('Group Creation', 'You need to select at least 1 person to create a group.');
       return;
     }
-    console.log('Group created with:', groupName, groupImage, selectedContacts);
+    const dm = selectedContacts.length === 2
+    try{
+      const file = await fetch(image.uri)
+      const blob =await file.blob()
+      const url = await uploadImage()
+      const response = await fetch(url,{
+          method:'POST',
+          headers:{
+              'Content-Type':image.type,
+          },
+          body:blob
+      })
+      const {storageId} = await response.json()
+      const storageUrl = await getImage({storageId})
+      const group = await createGroup({
+        email:route.params!.email,
+        name:groupName,
+        description:"",
+        imgUrl:storageUrl!,
+        isDm:dm
+      })
+      for(let i = 0 ; i < selectedContacts.length ; i++){
+        await joinGroup({
+          groupId:group.data!.groupId,
+          email:selectedContacts[i].email
+        })
+      }      
+      navigation.navigate('GroupChat',{ email:route.params!.email,groupId:group.data?.groupId})
+    }catch(error){
+      console.error(error);
+    }
+    // console.log('Group created with:', groupName, groupImage, selectedContacts);
     // Add group creation logic here
     setGroupName(''); // Reset group name
-    setGroupImage('https://via.placeholder.com/100'); 
-    setSelectedContacts([sampleUser]); 
-    setContacts(sampleContacts); 
+    setGroupImage('https://via.placeholder.com/100');
+    setSelectedContacts([sampleUser]);
+    setContacts(sampleContacts);
   };
 
   // Render contacts list
-  const renderContact = ({ item }: { item: any }) => (
-    <TouchableOpacity style={styles.contactItem} onPress={() => handleSelectContact(item)}>
-      <Image source={{ uri: item.avatar || 'https://via.placeholder.com/50' }} style={styles.avatar} />
-      <Text style={styles.contactName}>{item.name}</Text>
-    </TouchableOpacity>
-  );
+  const renderContact = ({ item }: { item: any }) => {
+    if(sampleUser._id===item._id){
+      return <TouchableOpacity></TouchableOpacity>; 
+    }
+    return (
+      <TouchableOpacity style={styles.contactItem} onPress={() => handleSelectContact(item)}>
+        <Image source={{ uri: item.avatar || 'https://via.placeholder.com/50' }} style={styles.avatar} />
+        <Text style={styles.contactName}>{item.name ?? item.email}</Text>
+      </TouchableOpacity>
+    )
+  };
 
   // Render selected contacts list (name below image)
   const renderSelectedContact = ({ item }: { item: any }) => (
     <TouchableOpacity style={styles.selectedContactItem} onPress={() => handleRemoveContact(item)}>
       <Image source={{ uri: item.avatar || 'https://via.placeholder.com/50' }} style={styles.avatarSmall} />
-      <Text style={styles.selectedContactName}>{item.name}</Text>
-      {item.id !== sampleUser.id && (
+      <Text style={styles.selectedContactName}>{item.name ?? item.email}</Text>
+      {item._id !== sampleUser._id && (
         <Icon name="times" size={16} color="#fff" style={styles.removeIcon} />
       )}
     </TouchableOpacity>
@@ -161,7 +220,7 @@ export default function GroupComponent({ navigation, route }: { navigation: Navi
           <FlatList
             data={selectedContacts}
             renderItem={renderSelectedContact}
-            keyExtractor={(item) => item.email}
+            keyExtractor={(item) => item._id}
             horizontal
             style={styles.selectedContactList}
           />
@@ -173,7 +232,7 @@ export default function GroupComponent({ navigation, route }: { navigation: Navi
       <FlatList
         data={contacts}
         renderItem={renderContact}
-        keyExtractor={(item) => item.email}
+        keyExtractor={(item) => item._id}
         style={styles.contactList}
       />
 
@@ -224,7 +283,7 @@ const styles = StyleSheet.create({
     color: '#DD651B',
     textAlign: 'center',
     marginBottom: 20,
-    fontWeight:'600',
+    fontWeight: '600',
   },
   contactList: {
     flexGrow: 0,

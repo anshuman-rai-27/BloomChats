@@ -15,7 +15,11 @@ const schema = defineSchema({
     messages:defineTable({
         from:v.id('users'),
         content:v.string(),
-        groupId:v.id('groups')
+        groupId:v.id('groups'),
+        isOneTime:v.optional(v.boolean()),
+        isExpiry:v.optional(v.boolean()),
+        isEdited:v.optional(v.boolean()),
+        seen:v.optional(v.boolean()),
     }),
     verification:defineTable({
         email:v.string(),
@@ -31,7 +35,10 @@ const schema = defineSchema({
         description:v.string(),
         isDm:v.boolean(),
         owner:v.id('users'),
-    }) 
+        avatar:v.optional(v.string()),
+        expiry:v.optional(v.string()),
+        isExpiry:v.optional(v.boolean())
+    })
 })
 export default schema;
 
