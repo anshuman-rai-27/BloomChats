@@ -41,11 +41,11 @@ export const VerificationScreen = ({ navigation, route }: { navigation: Navigati
             const userKeys = generateKeyPair();
             try {
                 await signIn("password", { email, password, flow: "signUp" })
-                await AsyncStorage.setItem('privKey', encodeBase64(userKeys.secretKey));
+                // await AsyncStorage.setItem('privKey', encodeBase64(userKeys.secretKey));
                 await AsyncStorage.setItem('email', email);
                 await AsyncStorage.setItem(email, encodeBase64(userKeys.secretKey));
                 await setPublicKey({ email: email, publicKey: encodeBase64(userKeys.publicKey) });
-                navigation.navigate('Chat', { email: email })
+                navigation.navigate('Username', { email: email })
             } catch (error) {
                 console.error(error);
             }

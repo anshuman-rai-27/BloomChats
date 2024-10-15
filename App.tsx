@@ -21,23 +21,25 @@ import Login from './components/login';
 
 import Chatbox from './components/chatbox';
 import { Id } from './convex/_generated/dataModel';
-import GroupComponent from './auth_components/GroupComponent';
+import GroupComponent from './components/groupCreate';
 import Testing from './auth_components/Testing';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import Register from './components/register';
 import ChatScreen from './components/chatScreen';
 import { VerificationScreen } from './components/verification';
+import { UsernameComponent } from './components/username';
 
 export type RootStackParamList = {
-  CallPage:undefined;
+  CallPage:{email:string, groupId:Id<'groups'>, name:string};
   Login: undefined;
   Chat: { email: string };
-  Group: undefined;
+  // Group: undefined;
   Register: undefined;
   Verification:{email:string, password:string, type:'signUp'|'signIn'},
   GroupChat: { groupId: Id<'groups'>; email: string };
-  Test: undefined;
+  GroupCreate: {email:string};
+  Username:{email:string};
 }
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -53,9 +55,11 @@ function App() {
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Register" component={Register} />
           <Stack.Screen name="Chat" component={ChatScreen} />
-          <Stack.Screen name="Test" component={Testing} />
+          <Stack.Screen name="GroupCreate" component={GroupComponent} />
           <Stack.Screen name="Verification" component={VerificationScreen} />
+          <Stack.Screen name="Username" component={UsernameComponent} />
           <Stack.Screen name="GroupChat" component={Chatbox}/>
+          <Stack.Screen name="CallPage" component={CallPage}/>
         </Stack.Navigator>
       </NavigationContainer>
     </RootLayout>)

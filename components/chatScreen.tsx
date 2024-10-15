@@ -73,6 +73,8 @@ const ChatScreen = ({ route }: { route: RouteProp<any> }) => {
         useNativeDriver: true,
       }),
     ]).start();
+
+    navigation.navigate('GroupCreate',{email:route.params?.email})
   };
 
   // Animation for bottom navigation
@@ -130,12 +132,12 @@ const ChatScreen = ({ route }: { route: RouteProp<any> }) => {
       <FlatList
         data={filteredChats}
         renderItem={renderChatItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         contentContainerStyle={[styles.chatList, { paddingBottom: height * 0.2 }]}
       />
 
       {/* Floating Action Button */}
-      <TouchableOpacity style={styles.fab}>
+      <TouchableOpacity style={styles.fab} onPress={handleAddButtonPress}>
         <Icon name="plus" size={20} color="#fff" />
       </TouchableOpacity>
 

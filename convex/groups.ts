@@ -3,7 +3,7 @@ import { mutation, query } from "./_generated/server";
 import { DataModel } from "./_generated/dataModel";
 
 export const createGroup = mutation({
-    args:{name:v.string(), description:v.string(), isDm:v.boolean(), email:v.string()},
+    args:{name:v.string(), description:v.string(), isDm:v.boolean(), email:v.string(), imgUrl:v.string()},
 
     handler:async(ctx,args) =>{
         const userId = await ctx.db.query('users').filter((q)=>q.eq(q.field('email'), args.email)).first();
@@ -12,11 +12,8 @@ export const createGroup = mutation({
                  description:args.description,
                  name:args.name,
                  isDm:args.isDm,
-                 owner: userId!._id
-            })
-            await ctx.db.insert('groupchats',{
-                userId:userId!._id,
-                groupId:groupId
+                 owner: userId!._id,
+                 avatar:args.imgUrl
             })
             return {data:{groupId:groupId},error:null}
         } catch (error) {
@@ -64,7 +61,9 @@ export const getGroup = query({
 export const joinGroup = mutation({
     args:{groupId:v.id('groups'), email:v.string()},
     handler:async (ctx, args)=>{
+        console.log(args.email)
         const userId = await ctx.db.query('users').filter((q)=>q.eq(q.field('email'), args.email)).first();
+        console.log(userId)
         try {
             await ctx.db.insert('groupchats',{
                 userId:userId!._id,

@@ -10,6 +10,13 @@ export const getUser = query({
     }
 })
 
+export const getAllUser = query({
+    args:{},
+    handler:async (ctx,args)=>{
+        return await ctx.db.query('users').collect();
+    }
+})
+
 export const getUserByUserId = query({
     args:{userId:v.id('users')},
     handler:async(ctx,args)=>{
@@ -25,6 +32,18 @@ export const createVerificationCode = mutation({
             email:args.email,
             code: args.code,
             type:args.type
+        })
+    }
+})
+
+export const updateUser = mutation({
+    args:{email:v.string(), imgUrl:v.string(), name:v.string(), phone:v.string()},
+    handler:async(ctx,args)=>{
+        const user = await ctx.db.query('users').filter((q)=>q.eq(q.field('email'), args.email)).first();
+        await ctx.db.patch(user!._id, {
+            name:args.name,
+            phone:args.phone,
+            image:args.imgUrl
         })
     }
 })

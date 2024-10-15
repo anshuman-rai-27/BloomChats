@@ -39,8 +39,12 @@ export function TestComponent(){
     }
     return (
         <View>
-            <TextInput onChangeText={setGroupName} placeholder="Group name"/>
-            <TextInput onChangeText={setToEmail} placeholder="To email"/>
+            <TextInput style={{
+                color:"black"
+            }} onChangeText={setGroupName} placeholder="Group name"/>
+            <TextInput style={{
+                color:"black"
+            }} onChangeText={setToEmail} placeholder="To email"/>
             <Button onPress={()=>{
                 handleGroupCreation();
             }} title="Submit" />
