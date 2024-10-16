@@ -38,50 +38,52 @@ const Login = () => {
   const createVerificationCode = useAction(api.users.sendEmail);
   const handleLogin = async () => {
     await createVerificationCode({
-      email:email,
-      type:'signIn'
+      email: email,
+      type: 'signIn'
     })
-    navigation.navigate('Verification',{email:email, password:password, type:'signIn'});
+    navigation.navigate('Verification', { email: email, password: password, type: 'signIn' });
   };
 
   return (
     <AuthComponent>
-      {!isLoading ? (<><Text style={styles.title}>Welcome Back!</Text>
+      {!isLoading ? (
+        <>
+          <Text style={styles.title}>Welcome Back!</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            placeholderTextColor="#999"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+          />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#999"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            placeholderTextColor="#999"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#999"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity>
-          <Text style={styles.forgotPassword}>Forgot Password?</Text>
-        </TouchableOpacity>
-
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Don't have an account?</Text>
-          <TouchableOpacity onPress={() => {
-            navigation.navigate("Register")
-          }}>
-            <Text style={styles.signUp}>Sign Up</Text>
+          <TouchableOpacity style={styles.button} onPress={handleLogin}>
+            <Text style={styles.buttonText}>Login</Text>
           </TouchableOpacity>
-        </View></>) : (<Text style={styles.title}>Loading</Text>)}
+
+          <TouchableOpacity>
+            <Text style={styles.forgotPassword}>Forgot Password?</Text>
+          </TouchableOpacity>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Don't have an account?</Text>
+            <TouchableOpacity onPress={() => {
+              navigation.navigate("Register")
+            }}>
+              <Text style={styles.signUp}>Sign Up</Text>
+            </TouchableOpacity>
+          </View>
+        </>) : (<Text style={styles.title}>Loading</Text>)}
     </AuthComponent>
   );
 };

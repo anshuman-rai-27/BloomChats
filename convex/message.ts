@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { action, internalMutation, mutation, query } from "./_generated/server";
+import { action, internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 
@@ -11,6 +11,44 @@ export const getMessageByGroupId = query({
 
     }
 })
+
+export const getDmMessage = query(
+    {
+        args:{fromUser:v.id("users"), toUser:v.id("users")},
+        handler:async (ctx,args)=>{
+            // from=id1&to=id2 || from=id2&to=id1
+            const dm = await ctx.db.query('dm').filter((q)=>q.or(
+                q.and(
+                    q.eq(q.field('from'), args.fromUser), 
+                    q.eq(q.field('to'), args.toUser)
+                ),
+                q.and(
+                    q.eq(q.field('to'), args.fromUser),
+                    q.eq(q.field('from'), args.toUser)
+                )
+            )).order('asc').collect();
+            return dm;
+        }
+    }
+)
+
+
+export const createDmMessage = mutation({
+    args:{fromUser:v.id('users'), toUser:v.id('users'), content:v.string(), isExpiry:v.optional(v.boolean()), isOneTime:v.optional(v.boolean())},
+    handler:async (ctx,args) =>{
+        await ctx.db.insert('dm',{
+            from:args.fromUser,
+            to:args.toUser,
+            content:args.content,
+            isEdited:false,
+            isExpiry:args.isExpiry,
+            isOneTime:args.isOneTime,
+            seen:false,
+        })
+    }
+
+})
+
 export const getUploadUrl = action({
     args:{},
     handler:async (ctx,args)=>{

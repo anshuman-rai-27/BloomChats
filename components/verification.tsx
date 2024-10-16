@@ -29,7 +29,7 @@ export const VerificationScreen = ({ navigation, route }: { navigation: Navigati
             setErr('Error: Invalid Code');
             return;
         }
-        if (route.params!.type === "signIn") {
+        if (type === "signIn") {
             try {
                 await signIn("password", { email: email, password: password, flow: "signIn" })
                 await AsyncStorage.setItem('email', email);
