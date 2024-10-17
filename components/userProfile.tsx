@@ -1,14 +1,13 @@
-// UserProfileComponent.tsx
 import React, { useState } from 'react';
 import {
   View,
   Text,
-  Button,
   Image,
   TextInput,
   Alert,
   StyleSheet,
   TouchableOpacity,
+  ImageBackground,
 } from 'react-native';
 import { launchImageLibrary, ImagePickerResponse, ImageLibraryOptions } from 'react-native-image-picker';
 
@@ -19,8 +18,8 @@ interface User {
 
 const UserProfileComponent: React.FC = () => {
   const [user, setUser] = useState<User>({
-    name: 'John Doe',
-    dp: undefined, // Start with no image
+    name: '',
+    dp: undefined,
   });
 
   const handleUpdateProfile = (updatedData: Partial<User>) => {
@@ -28,7 +27,6 @@ const UserProfileComponent: React.FC = () => {
       ...prevUser,
       ...updatedData,
     }));
-    Alert.alert('Profile updated successfully');
   };
 
   const handleLogout = () => {
@@ -41,7 +39,7 @@ const UserProfileComponent: React.FC = () => {
       mediaType: 'photo',
       maxWidth: 300,
       maxHeight: 300,
-      quality: 0.8, // Use a numeric value between 0 and 1 for quality
+      quality: 1,
     };
 
     launchImageLibrary(options, (response: ImagePickerResponse) => {
@@ -65,29 +63,63 @@ const UserProfileComponent: React.FC = () => {
     }
 
     handleUpdateProfile({ name: user.name });
+    Alert.alert('Profile updated successfully');
+  };
+
+  const handleBackPress = () => {
+    // Implement your logic to navigate back or close the profile
+    Alert.alert('Back button pressed');
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>User Profile</Text>
-      <TouchableOpacity onPress={handleImagePick}>
+    <ImageBackground
+      source={require('../assets/images/chat1.jpg')}
+      style={styles.container}
+      resizeMode="cover"
+    >
+      <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
         <Image
-          source={{
-            uri: user.dp || 'https://via.placeholder.com/100', // Use a default image if no dp is set
-          }}
-          style={styles.dp}
+          source={require('../assets/images/back.png')}
+          style={styles.backIcon}
         />
       </TouchableOpacity>
-      <Button title={user.dp ? "Change User Image" : "Add User Image"} onPress={handleImagePick} />
+
+      <Text style={styles.title}>User Profile</Text>
+      <TouchableOpacity onPress={handleImagePick}>
+        <View style={styles.imageContainer}>
+          <Image
+            source={{
+              uri: user.dp || 'https://via.placeholder.com/100',
+            }}
+            style={styles.dp}
+          />
+          <View style={styles.iconContainer}>
+            <Image
+              source={require('../assets/images/editIcon.png')}
+              style={styles.icon}
+            />
+          </View>
+        </View>
+      </TouchableOpacity>
+
+      <Text style={styles.name}>Name</Text>
       <TextInput
         style={styles.input}
         value={user.name}
         onChangeText={(text) => handleUpdateProfile({ name: text })}
         placeholder="Enter your name"
       />
-      <Button title="Save" onPress={handleSave} />
-      <Button title="Logout" onPress={handleLogout} color="red" />
-    </View>
+
+      {/* Styled Save button */}
+      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+        <Text style={styles.buttonText}>Save</Text>
+      </TouchableOpacity>
+
+      {/* Styled Logout button */}
+      <TouchableOpacity style={[styles.saveButton, styles.logoutButton]} onPress={handleLogout}>
+        <Text style={styles.buttonText}>Logout !</Text>
+      </TouchableOpacity>
+    </ImageBackground>
   );
 };
 
@@ -99,27 +131,83 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#121212',
   },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+  },
+  backIcon: {
+    width: 30,
+    height: 30,
+  },
+  name: {
+    marginRight: 200,
+    fontWeight: 'bold',
+    marginTop: 20,
+    color:'#DD651B',
+  },
   title: {
     fontSize: 24,
-    marginBottom: 20,
-    color: 'white', // Updated for better contrast
+    marginBottom: 40,
+    color: 'white',
   },
-  dp: {
+  imageContainer: {
+    position: 'relative',
     width: 100,
     height: 100,
+  },
+  dp: {
+    width: '100%',
+    height: '100%',
     borderRadius: 50,
-    marginBottom: 20,
-    borderColor: 'gray',
-    borderWidth: 1,
+    borderColor: '#000',
+    borderWidth: 3,
+  },
+  iconContainer: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 40,
+    height: 40,
+    borderRadius: 100,
+    backgroundColor: '#000',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderColor: '#bbb',
+    borderWidth: 0,
+  },
+  icon: {
+    width: 20,
+    height: 20,
+    marginTop: 4,
   },
   input: {
+    marginTop: 20,
+    paddingLeft: 40,
     width: '100%',
-    borderColor: 'gray',
-    borderWidth: 1,
-    borderRadius: 5,
+    color: 'white',
     padding: 10,
     marginBottom: 20,
-   
+  },
+  saveButton: {
+    backgroundColor: '#DD651B',
+    padding: 12,
+    borderRadius: 8,
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 40,
+  },
+  logoutButton: {
+    marginTop: 60,
+    backgroundColor:'',
+    padding: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.6)',
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
 
