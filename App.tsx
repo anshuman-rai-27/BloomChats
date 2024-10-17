@@ -26,15 +26,18 @@ import Testing from './auth_components/Testing';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import Register from './components/register';
+import DmCreate from './components/dmCreate';
 import ChatScreen from './components/chatScreen';
 import { VerificationScreen } from './components/verification';
 import { UsernameComponent } from './components/username';
+import { DmChatbox } from './components/dm';
 
 export type RootStackParamList = {
   CallPage:{email:string, groupId:Id<'groups'>, name:string};
   Login: undefined;
   Chat: { email: string };
-  // Group: undefined;
+  DmChat:{fromId:string, toId:string};
+  DmCreate:{email:string},
   Register: undefined;
   Verification:{email:string, password:string, type:'signUp'|'signIn'},
   GroupChat: { groupId: Id<'groups'>; email: string };
@@ -55,6 +58,8 @@ function App() {
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Register" component={Register} />
           <Stack.Screen name="Chat" component={ChatScreen} />
+          <Stack.Screen name="DmChat" component={DmChatbox} />
+          <Stack.Screen name="DmCreate" component={DmCreate} />
           <Stack.Screen name="GroupCreate" component={GroupComponent} />
           <Stack.Screen name="Verification" component={VerificationScreen} />
           <Stack.Screen name="Username" component={UsernameComponent} />
@@ -64,24 +69,5 @@ function App() {
       </NavigationContainer>
     </RootLayout>)
 }
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default App;

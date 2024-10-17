@@ -24,6 +24,74 @@ export const getUserByUserId = query({
     }
 })
 
+export const removeGroupMember = mutation({
+    args:{groupId:v.id('groups'), userId:v.id('users')},
+    handler: async (ctx, args) =>{
+        const groupConnection = await ctx.db.query('groupchats').filter((q)=>q.eq(q.field('groupId'), args.groupId)).filter((q)=>q.eq(q.field('userId'), args.userId)).first();
+        if(groupConnection)
+            await ctx.db.delete(groupConnection._id);
+    }
+})
+
+
+export const removeFriendShip = mutation({
+    args:{from:v.id('users'), to:v.id('users')},
+    handler:async (ctx,args)=>{
+        const friend = await ctx.db.query('friend').filter((q)=>q.and(q.eq(q.field('from'), args.from), q.eq(q.field('to'), args.to))).first();
+        if(friend)
+            await ctx.db.delete(friend._id);
+    }
+})
+
+export const getFriendShip = query({
+    args:{fromEmail:v.string()},
+    handler:async(ctx,args)=>{
+        const user = await ctx.db.query('users').filter((q)=>q.eq(q.field('email'), args.fromEmail)).first()
+        if(!user){
+            console.error("User doesn't exist")
+            return;
+        }
+        const friendships = await ctx.db.query('friend').filter((q)=>q.eq(q.field('from'), user._id)).collect();
+        const users = [];
+        for(let i = 0 ; i < friendships.length ; i++){
+            const friend = await ctx.db.get(friendships[i].to);
+            users.push(friend)
+        }
+        return users;
+    }
+})
+
+export const createFriendship = mutation({
+    args:{from:v.id('users'), to:v.id('users')},
+    handler: async(ctx,args)=>{
+        const friendship = await ctx.db.query('friend').filter((q)=>q.or(
+            q.and(
+                q.eq(q.field('from'), args.from), 
+                q.eq(q.field('to'), args.to),
+            ),
+            q.and(
+                q.eq(q.field('to'), args.from),
+                q.eq(q.field('from'), args.to),
+            ),
+        )).collect()
+        
+        if(friendship.length) return;
+        const friendship1 = await ctx.db.query('friend').filter((q)=>q.and(q.eq(q.field('from'),args.from),q.eq(q.field('to'),args.to))).collect()
+        if(!friendship1.length)
+        await ctx.db.insert('friend',{
+            from:args.from,
+            to:args.to
+        })
+        const friendship2 = await ctx.db.query('friend').filter((q)=>q.and(q.eq(q.field('from'),args.to),q.eq(q.field('to'),args.from))).collect()
+        if(!friendship2.length)
+        await ctx.db.insert('friend',{
+            from:args.to,
+            to:args.from
+        })
+
+    }
+})
+
 
 export const createVerificationCode = mutation({
     args:{email:v.string(), code:v.string(),type:v.union(v.literal("signIn"), v.literal('signUp'))},

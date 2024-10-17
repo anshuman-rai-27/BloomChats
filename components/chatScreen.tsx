@@ -17,10 +17,11 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { NavigationProp, RouteProp, useNavigation } from '@react-navigation/native';
-import { useConvexAuth, useQuery } from 'convex/react';
+import { useConvexAuth, useMutation, useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
 import { RootStackParamList } from '../App';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Id } from '../convex/_generated/dataModel';
 
 const { width, height } = Dimensions.get('window');
 
@@ -28,9 +29,14 @@ type chatScreenProp = NativeStackNavigationProp<RootStackParamList, "Chat">
 
 const ChatScreen = ({ route }: { route: RouteProp<any> }) => {
   const [chats, setChats] = useState<any[]>([]);
+  const [friendChat, setFriendChat] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const navigation = useNavigation<chatScreenProp>();
-
+  const removeFriend = useMutation(api.users.removeFriendShip)
+  
+  const friends = useQuery(api.users.getFriendShip, {
+    fromEmail:route.params!.email
+  })
   const user = useQuery(api.users.getUser,{
     email:route.params!.email
   })
@@ -41,18 +47,38 @@ const ChatScreen = ({ route }: { route: RouteProp<any> }) => {
   const filteredChats = chats.filter((chat: any) =>
     chat.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  const filteredFriendChat = friendChat.filter((chat: any) =>
+    chat.name?.toLowerCase().includes(searchQuery.toLowerCase())??chat.email.toLowerCase().includes(searchQuery.toLowerCase()) 
+  );
+  
 
-  const deleteChat = (id: string) => {
+  const deleteChat = (id: Id<'groups'>) => {
     setChats((prev: any) => prev.filter((chat: any) => chat._id !== id));
+    
+  };
+  const deleteFriendChat = async (id: Id<'users'>) => {
+    setFriendChat((prev: any) => prev.filter((chat: any) => chat._id !== id));
+    await removeFriend({from:user?._id!, to:id})
+    
   };
 
-  const handleLongPress = (id: string) => {
+  const handleLongPress = (id: Id<'groups'>) => {
     Alert.alert(
       "Delete Chat",
       "Are you sure you want to delete this chat?",
       [
         { text: "Cancel", style: "cancel" },
         { text: "Delete", onPress: () => deleteChat(id), style: "destructive" }
+      ]
+    );
+  };
+  const handleFriendLongPress = (id: Id<'users'>) => {
+    Alert.alert(
+      "Delete Chat",
+      "Are you sure you want to delete this chat?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete", onPress: () => deleteFriendChat(id), style: "destructive" }
       ]
     );
   };
@@ -74,7 +100,7 @@ const ChatScreen = ({ route }: { route: RouteProp<any> }) => {
       }),
     ]).start();
 
-    navigation.navigate('GroupCreate',{email:route.params?.email})
+    navigation.navigate('DmCreate',{email:route.params?.email})
   };
 
   // Animation for bottom navigation
@@ -90,6 +116,9 @@ const ChatScreen = ({ route }: { route: RouteProp<any> }) => {
   useEffect(()=>{
     setChats(group?.data ?? [])
   },[group])
+  useEffect(()=>{
+    setFriendChat(friends ?? [])
+  },[friends])
 
   const renderChatItem = ({ item }: { item: any }) => (
     <TouchableOpacity
@@ -102,6 +131,20 @@ const ChatScreen = ({ route }: { route: RouteProp<any> }) => {
       <Image source={{ uri: item.avatar ?? "https://via.placeholder.com/50" }} style={styles.avatar} />
       <View style={styles.chatDetails}>
         <Text style={styles.chatName}>{item.name}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+  const renderFriendChatItem = ({ item }: { item: any }) => (
+    <TouchableOpacity
+      onLongPress={() => handleFriendLongPress(item._id)}
+      onPress={() => {
+        navigation.navigate('DmChat', { toId: item._id, fromId:user?._id! });
+      }}
+      style={styles.chatItem}
+    >
+      <Image source={{ uri: item.avatar ?? "https://via.placeholder.com/50" }} style={styles.avatar} />
+      <View style={styles.chatDetails}>
+        <Text style={styles.chatName}>{item.name ?? item.email}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -132,6 +175,13 @@ const ChatScreen = ({ route }: { route: RouteProp<any> }) => {
       <FlatList
         data={filteredChats}
         renderItem={renderChatItem}
+        keyExtractor={(item) => item._id}
+        contentContainerStyle={[styles.chatList, { paddingBottom: height * 0.2 }]}
+      />
+      <Text style={styles.greeting}>Direct Message</Text>
+      <FlatList
+        data={filteredFriendChat}
+        renderItem={renderFriendChatItem}
         keyExtractor={(item) => item._id}
         contentContainerStyle={[styles.chatList, { paddingBottom: height * 0.2 }]}
       />

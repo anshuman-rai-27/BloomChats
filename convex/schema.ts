@@ -21,14 +21,34 @@ const schema = defineSchema({
         isEdited:v.optional(v.boolean()),
         seen:v.optional(v.boolean()),
     }),
+    friend:defineTable({
+        from:v.id('users'),
+        to:v.id('users')
+    }),
+    dm:defineTable({
+        from:v.id('users'),
+        to:v.id('users'),
+        content:v.string(),
+        isOneTime:v.optional(v.boolean()),
+        isExpiry:v.optional(v.boolean()),
+        isEdited:v.optional(v.boolean()),
+        seen:v.optional(v.boolean())
+    }),
+    callLogs:defineTable({
+        from:v.id('users'),
+        to:v.id('users'),
+        status:v.union(v.literal('ONGOING'), v.literal('COMPLETED'))
+    }),
     verification:defineTable({
         email:v.string(),
         type:v.union(v.literal('signIn'), v.literal('signUp')),
         code:v.string()
     }),
     sessions:defineTable({
-        deviceId:v.string(),
-        authSessionId:v.id('authSessions')
+        type:v.union(v.literal('TEMPORARY'), v.literal('PERMANT')),
+        secret:v.string(),
+        userId:v.string(),
+        code:v.optional(v.string())
     }),
     groups:defineTable({
         name:v.string(),

@@ -56,7 +56,6 @@ export default function GroupComponent({ navigation, route }: { navigation: Navi
   const joinGroup = useMutation(api.groups.joinGroup);
 
 
-
   // >>>>>>>>>> Setting Group Data
   useEffect(() => {
     setContacts(users)
@@ -80,7 +79,7 @@ export default function GroupComponent({ navigation, route }: { navigation: Navi
 
   // Handle removing selected contact
   const handleRemoveContact = (contact: any) => {
-    if (contact._id === sampleUser._id) {
+    if (contact._id === sampleUser?._id) {
       return; // Don't allow removing the user (creator) from the selected contacts
     }
     setSelectedContacts(selectedContacts.filter((c: any) => c._id !== contact._id)); // Remove contact from selected
@@ -130,35 +129,37 @@ export default function GroupComponent({ navigation, route }: { navigation: Navi
       Alert.alert('Group Creation', 'You need to select at least 1 person to create a group.');
       return;
     }
-    const dm = selectedContacts.length === 2
-    try{
-      const file = await fetch(image.uri)
-      const blob =await file.blob()
-      const url = await uploadImage()
-      const response = await fetch(url,{
-          method:'POST',
-          headers:{
-              'Content-Type':image.type,
+    try {
+      let groupImage = "https://via.placeholder.com/50";
+      if (image) {
+        const file = await fetch(image.uri)
+        const blob = await file.blob()
+        const url = await uploadImage()
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': image.type,
           },
-          body:blob
-      })
-      const {storageId} = await response.json()
-      const storageUrl = await getImage({storageId})
-      const group = await createGroup({
-        email:route.params!.email,
-        name:groupName,
-        description:"",
-        imgUrl:storageUrl!,
-        isDm:dm
-      })
-      for(let i = 0 ; i < selectedContacts.length ; i++){
-        await joinGroup({
-          groupId:group.data!.groupId,
-          email:selectedContacts[i].email
+          body: blob
         })
-      }      
-      navigation.navigate('GroupChat',{ email:route.params!.email,groupId:group.data?.groupId})
-    }catch(error){
+        const { storageId } = await response.json()
+        groupImage = await getImage({ storageId }) ?? groupImage
+      }
+      const group = await createGroup({
+        email: route.params!.email,
+        name: groupName,
+        description: "",
+        imgUrl: groupImage,
+        isDm: false
+      })
+      for (let i = 0; i < selectedContacts.length; i++) {
+        await joinGroup({
+          groupId: group.data!.groupId,
+          email: selectedContacts[i].email
+        })
+      }
+      navigation.navigate('GroupChat', { email: route.params!.email, groupId: group.data?.groupId })
+    } catch (error) {
       console.error(error);
     }
     // console.log('Group created with:', groupName, groupImage, selectedContacts);
@@ -171,12 +172,12 @@ export default function GroupComponent({ navigation, route }: { navigation: Navi
 
   // Render contacts list
   const renderContact = ({ item }: { item: any }) => {
-    if(sampleUser._id===item._id){
-      return <TouchableOpacity></TouchableOpacity>; 
+    if (sampleUser?._id === item._id) {
+      return <TouchableOpacity></TouchableOpacity>;
     }
     return (
       <TouchableOpacity style={styles.contactItem} onPress={() => handleSelectContact(item)}>
-        <Image source={{ uri: item.avatar || 'https://via.placeholder.com/50' }} style={styles.avatar} />
+        <Image source={{ uri: item.image ?? 'https://via.placeholder.com/50' }} style={styles.avatar} />
         <Text style={styles.contactName}>{item.name ?? item.email}</Text>
       </TouchableOpacity>
     )
@@ -185,7 +186,7 @@ export default function GroupComponent({ navigation, route }: { navigation: Navi
   // Render selected contacts list (name below image)
   const renderSelectedContact = ({ item }: { item: any }) => (
     <TouchableOpacity style={styles.selectedContactItem} onPress={() => handleRemoveContact(item)}>
-      <Image source={{ uri: item.avatar || 'https://via.placeholder.com/50' }} style={styles.avatarSmall} />
+      <Image source={{ uri: item.image ?? 'https://via.placeholder.com/50' }} style={styles.avatarSmall} />
       <Text style={styles.selectedContactName}>{item.name ?? item.email}</Text>
       {item._id !== sampleUser._id && (
         <Icon name="times" size={16} color="#fff" style={styles.removeIcon} />
