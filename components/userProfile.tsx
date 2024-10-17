@@ -199,10 +199,10 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     marginTop: 60,
-    backgroundColor:'',
+    backgroundColor:'grey',
     padding: 10,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.6)',
+    borderColor: 'rgba(255, 255, 255, 0.5)',
   },
   buttonText: {
     color: 'white',
