@@ -32,6 +32,8 @@ const schema = defineSchema({
         isOneTime:v.optional(v.boolean()),
         isExpiry:v.optional(v.boolean()),
         isEdited:v.optional(v.boolean()),
+        type:v.optional(v.union(v.literal('FILE'), v.literal('MESSAGE'))),
+        fileUrl:v.optional(v.string()),
         seen:v.optional(v.boolean())
     }),
     callLogs:defineTable({

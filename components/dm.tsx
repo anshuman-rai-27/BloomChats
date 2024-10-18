@@ -11,18 +11,20 @@ import {
   Modal,
   Pressable,
   TextInput,
+  Alert,
 } from 'react-native';
 import { RootStackParamList } from '../App';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp, useNavigation } from '@react-navigation/native'
 import { api } from "../convex/_generated/api";
-import { useMutation, useQuery } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { decodeBase64 } from 'tweetnacl-util';
 import { box } from "tweetnacl";
 import { decrypt, decryptSecretKey, encrypt } from '../utils';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import DocumentPicker from 'react-native-document-picker';
 
 const themes = [
   { id: 1, name: 'Orange Theme', backgroundImage: require('../assets/images/chat1.jpg'), myBubble: '#DD651B', theirBubble: '#333' },
@@ -32,6 +34,12 @@ const themes = [
   { id: 5, name: 'Pink Theme', backgroundImage: require('../assets/images/chat_pink.jpg'), myBubble: '#DA70A5', theirBubble: '#333' },
 ];
 
+const messageExpiry = [
+  { id: 1, name: '8 Hours', time: 8 * 60 * 60 * 1000 },
+  { id: 2, name: '1 Day', time: 24 * 60 * 60 * 1000 },
+  { id: 3, name: '1 Week', time: 7 * 24 * 60 * 60 * 1000 },
+]
+
 type groupChatScreenProp = NativeStackNavigationProp<RootStackParamList, "GroupChat">;
 
 export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
@@ -39,19 +47,25 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
 
   const fromId = route.params!.fromId
   const toId = route.params!.toId
-  
+
   const fromUser = useQuery(api.users.getUserByUserId, { userId: fromId });
   const toUser = useQuery(api.users.getUserByUserId, { userId: toId });
   const messages = useQuery(api.message.getDmMessage, { fromUser: fromId, toUser: toId });
   const publicKeyRetrieve = useMutation(api.users.getPublicKey);
   const create = useMutation(api.message.createDmMessage);
   const createFriendship = useMutation(api.users.createFriendship);
-  const sessions = useQuery(api.session.getSession,{
-    userId:fromId
+  const sessions = useQuery(api.session.getSession, {
+    userId: fromId
   })
+  const createCall = useMutation(api.calllog.createCallLog);
+  const uploadUrlGenerator = useAction(api.message.getUploadUrl)
+  const getUploadedFileUrl = useAction(api.message.getUrluploadFile)
 
+  const [file, setFile] = useState<any>();
   const [selectedTheme, setSelectedTheme] = useState(themes[0]);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isExpiryModalVisible, setExpiryModalVisible] = useState(false);
+  const [expiryTime, setExpiryTime] = useState<number>(messageExpiry[0].time);
   const [priv, setPriv] = useState<Uint8Array>();
   const [message, setMessage] = useState<string>("");
   const [sharedKey, setSharedKey] = useState<Uint8Array>();
@@ -63,8 +77,8 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
       try {
         if (fromUser?.email && toUser?.email && sessions) {
           const privd = JSON.parse((await AsyncStorage.getItem(fromUser.email))!);
-          const session = sessions?.find((session)=>session._id===privd.sessionId!)
-          
+          const session = sessions?.find((session) => session._id === privd.sessionId!)
+
           const privk = decryptSecretKey(session?.secret!, privd.privkey)
           const privKey = decodeBase64(privk);
           setPriv(privKey);
@@ -77,7 +91,7 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
       }
     };
     initializePrivateKeyAndSharedKey();
-  }, [fromUser, toUser,sessions]);
+  }, [fromUser, toUser, sessions]);
   function decryptMessage(message: string) {
     if (sharedKey)
       return decrypt(sharedKey, message);
@@ -128,30 +142,93 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
-  
-  const checkFriendShip = async () =>{
-    
-    await createFriendship({from:fromUser?._id!, to:toUser?._id!})
+
+  const toggleModalExpiry = () => {
+    setExpiryModalVisible(!isExpiryModalVisible)
+  }
+
+  const checkFriendShip = async () => {
+
+    await createFriendship({ from: fromUser?._id!, to: toUser?._id! })
     setFriend(true);
   }
 
   const sendMessage = async () => {
-    if(!friend){
-      
+    if (!friend) {
       await checkFriendShip();
     }
     if (sharedKey && message.trim()) {
-
+      const todayDate = new Date().getTime()
+      const messageContent = `${message.trim()}${expire ? ` (expires at ${new Date(todayDate + expiryTime).toLocaleString()})` : ' '}`
       await create({
         toUser: toUser!._id,
         fromUser: fromUser!._id,
         isExpiry: expire,
-        content: encrypt(sharedKey, message.trim()),
+        content: encrypt(sharedKey, messageContent.trim()),
+        time: expiryTime,
+        type: "MESSAGE"
       });
     }
     setMessage('');
   };
 
+  const sendFile = async () => {
+    if (!friend) {
+      await checkFriendShip();
+    }
+    if (sharedKey && file) {
+      const todayDate = new Date().getTime()
+      const messageContent = `${message.trim()}${expire ? ` (expires at ${new Date(todayDate + expiryTime).toLocaleString()})` : ' '}`
+      const response = await fetch(file.uri);
+      const blob = await response.blob()
+      const url = await uploadUrlGenerator();
+      const fileUploadResponse = await fetch(url,{
+        method:'POST',
+        headers:{
+          'Content-Type':file.type,
+        },
+        body:blob
+      })
+      const {storageId} = await fileUploadResponse.json()
+      const storageUrl = await getUploadedFileUrl({storageId});
+      await create({
+        toUser: toUser!._id,
+        fromUser: fromUser!._id,
+        isExpiry: expire,
+        content: encrypt(sharedKey, messageContent.trim()),
+        time: expiryTime,
+        fileUrl: storageUrl!,
+        type: "FILE"
+      });
+    }
+  }
+
+  const handleFileUpload = async () => {
+    try {
+      const file = await DocumentPicker.pick({
+        type: [DocumentPicker.types.allFiles],
+      });
+      setFile(file[0])
+      Alert.alert('File selected', file[0].name!);
+    } catch (err) {
+      if (DocumentPicker.isCancel(err)) {
+        console.log('User cancelled the file picker');
+      } else {
+        console.error('Error:', err);
+      }
+    }
+  };
+
+  const createCallLog = async () => {
+    const id = await createCall({
+      from: fromUser?._id!,
+      to: toUser?._id!
+    })
+    navigation.navigate('DmCallPage', { fromId: fromId, name: fromUser?.name!, email: fromUser?.email!, toId: toId, callId: id })
+  }
+  const handleExpiry = async () => {
+    setExpire(!expire)
+  }
   return (
     <ImageBackground
       source={selectedTheme.backgroundImage}
@@ -180,21 +257,50 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
             />
             <Text style={styles.userName}>{toUser?.name ?? toUser?.email}</Text>
           </View>
-
-          {/* <TouchableOpacity style={styles.videoCallIcon} onPress={() => {
-            navigation.navigate('CallPage', { email: from, groupId: route.params!.groupId, name: "" })
+          <View style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 10,
+            justifyContent: 'space-between',
+            width: '15%'
           }}>
-            <Image
+            <TouchableOpacity
+              style={{
+              }}
+              onPress={() => {
+
+                handleExpiry()
+                if (!expire) {
+                  toggleModalExpiry()
+                  Alert.alert('Expiry is enabled')
+                  return;
+                }
+                Alert.alert('Expiry is disabled')
+
+              }}
+            >
+              <Icon style={{ color: !expire ? 'white' : 'gray', fontSize: 20 }} name="clock-rotate-left" />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={{
+              paddingHorizontal: 10
+            }} onPress={() => {
+              createCallLog();
+            }}>
+              {/* <Image
               source={require('../assets/images/video_call.png')}
               style={styles.userImage}
-            />
+            /> */}
+              <FontAwesomeIcon style={{ color: 'white', fontSize: 20 }} name="video-camera" />
 
-          </TouchableOpacity> */}
+            </TouchableOpacity>
 
 
-          <TouchableOpacity style={styles.threeDotButton} onPress={toggleModal}>
-            <Text style={styles.threeDotText}>⋮</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={{}} onPress={toggleModal}>
+              <FontAwesomeIcon style={{ color: 'white', fontSize: 20 }} name="ellipsis-v" />
+            </TouchableOpacity>
+          </View>
         </View>
 
 
@@ -220,6 +326,23 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
             </View>
           </View>
         </Modal>
+        <Modal transparent={true} visible={isExpiryModalVisible} animationType='slide'>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>Select Time Expiry</Text>
+              {messageExpiry.map((expiry) => (
+                <Pressable key={`${expiry.id}-${expiry.name}`} style={styles.modalOption} onPress={() => {
+                  setExpiryTime(expiry.time)
+                  toggleModalExpiry()
+                }}>
+                  <View>
+                    <Text style={styles.modalOptionText}>{expiry.name}</Text>
+                  </View>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        </Modal>
 
         {/* Message List */}
         <FlatList
@@ -230,6 +353,21 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
         />
 
         {/* Message Input Section */}
+        {file && (<View style={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <Text style={{
+            color: 'white'
+          }}>File Selected: {file.name}</Text>
+          <TouchableOpacity onPress={()=>{
+            setFile(undefined);
+          }}>
+          <Icon name="delete-left"/>
+          </TouchableOpacity>
+        </View>)}
         <View style={styles.inputContainer}>
           <TextInput
             style={[styles.messageInput, { borderColor: selectedTheme.myBubble }]}
@@ -240,22 +378,17 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
           />
           <TouchableOpacity
             style={[styles.sendButton, { backgroundColor: selectedTheme.myBubble }]}
-            onPress={() => {
-              setExpire(!expire)
-              setMessage(`Expiration is ${expire?"Enabled":"Disabled"}`)
-              sendMessage()
-              setMessage('')
-            }}
+            onPress={handleFileUpload}
           >
             {/* <Text style={styles.sendButtonText}>Send</Text> */}
-            <Icon style={{color:'white'}} name="clock-rotate-left" />
+            <FontAwesomeIcon style={{ color: 'white' }} name="file" />
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.sendButton, { backgroundColor: selectedTheme.myBubble }]}
             onPress={sendMessage}
           >
             {/* <Text style={styles.sendButtonText}>Send</Text> */}
-            <FontAwesomeIcon style={{color:'white'}} name="send" />
+            <FontAwesomeIcon style={{ color: 'white' }} name="send" />
           </TouchableOpacity>
         </View>
       </View>
@@ -275,13 +408,10 @@ const styles = StyleSheet.create({
   },
 
   videoCallIcon: {
-    marginLeft: 8,
-    marginRight: -70,
-
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     alignItems: 'center',
     paddingBottom: 0,
   },
@@ -309,9 +439,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 12,
 
-  },
-  threeDotButton: {
-    padding: 10,
   },
   threeDotText: {
     color: 'white',
@@ -399,7 +526,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: 'white'
   },
+
   modalOption: {
     marginVertical: 5,
     width: '100%',
@@ -416,6 +545,9 @@ const styles = StyleSheet.create({
   },
   modalOptionText: {
     fontSize: 16,
+    color: 'white',
+    borderColor: 'white',
+    paddingVertical: 10
   },
 
   // Input styles
@@ -440,7 +572,15 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginBottom: 15,
-    
+
+  },
+  sendButtonDark: {
+    marginLeft: 10,
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginBottom: 15,
+    opacity: 10
   },
   sendButtonText: {
 

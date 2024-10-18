@@ -99,7 +99,9 @@ export const UsernameComponent = ({ navigation, route }: { navigation: Navigatio
                     paddingVertical: 10,
                     fontWeight: 900,
                     fontSize: 20,
-                }}>Verification Code</Text>
+                    color:'white',
+                    textAlign:'center'
+                }}>User Info</Text>
                 <TouchableOpacity onPress={handleSelectImage}>
                     <Image source={{ uri: userImage }} style={{
                         width: 70,

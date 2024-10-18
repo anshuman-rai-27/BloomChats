@@ -35,6 +35,7 @@ import OtherDevicesScreen from './components/otherDevices';
 import { IntervalScreen } from './components/sessionVerification';
 import UserProfileComponent from './components/userProfile';
 import BillSplit from './components/billSplit';
+import DmCallPage from './components/callDm';
 
 export type RootStackParamList = {
   CallPage:{email:string, groupId:Id<'groups'>, name:string};
@@ -51,6 +52,7 @@ export type RootStackParamList = {
   SessionVerification:{email:string};
   Profile:{email:string};
   BillSplit:{email:string};
+  DmCallPage:{fromId:Id<'users'>, name:string, email:string, toId:Id<'users'>, callId:Id<'callLogs'>}
 }
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -77,6 +79,7 @@ function App() {
           <Stack.Screen name="Profile" component={UserProfileComponent} />
           <Stack.Screen name="CallPage" component={CallPage}/>
           <Stack.Screen name="BillSplit" component={BillSplit} />
+          <Stack.Screen name="DmCallPage" component={DmCallPage} />
         </Stack.Navigator>
       </NavigationContainer>
     </RootLayout>)
