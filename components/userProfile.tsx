@@ -186,8 +186,14 @@ const styles = StyleSheet.create({
     paddingLeft: 40,
     width: '100%',
     color: 'white',
-    padding: 10,
+    paddingHorizontal:5,
+    paddingVertical:10,
     marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+    borderRadius: 10,
+    
+
   },
   saveButton: {
     backgroundColor: '#DD651B',
