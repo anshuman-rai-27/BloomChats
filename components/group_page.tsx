@@ -23,11 +23,12 @@ import { RootStackParamList } from '../App';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Id } from '../convex/_generated/dataModel';
 
+
 const { width, height } = Dimensions.get('window');
 
 type chatScreenProp = NativeStackNavigationProp<RootStackParamList, "Chat">
 
-const ChatScreen = ({ route }: { route: RouteProp<any> }) => {
+const GroupChatScreen = ({ route }: { route: RouteProp<any> }) => {
   const [chats, setChats] = useState<any[]>([]);
   const [friendChat, setFriendChat] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -173,20 +174,13 @@ const ChatScreen = ({ route }: { route: RouteProp<any> }) => {
       </View>
 
       {/* Chat List */}
-      {/* <FlatList
+      <FlatList
         data={filteredChats}
         renderItem={renderChatItem}
         keyExtractor={(item) => item._id}
         contentContainerStyle={[styles.chatList, { paddingBottom: height * 0.2 }]}
       />
-      <Text style={styles.greeting}>Direct Message</Text> */}
-      <FlatList
-        data={filteredFriendChat}
-        renderItem={renderFriendChatItem}
-        keyExtractor={(item) => item._id}
-        contentContainerStyle={[styles.chatList, { paddingBottom: height * 0.2 }]}
-      />
-
+     
       {/* Floating Action Button */}
       <TouchableOpacity style={styles.fab} onPress={handleAddButtonPress}>
         <Icon name="plus" size={20} color="#fff" />
@@ -194,7 +188,9 @@ const ChatScreen = ({ route }: { route: RouteProp<any> }) => {
 
       {/* Bottom Navbar */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity style={styles.navItem} onPress={()=>{
+          navigation.navigate('Chat',{email:route.params!.email})
+        }}>
           <Icon name="home" size={20} color="#bbb" />
           <Text style={styles.navIcons}>Home</Text>
         </TouchableOpacity>
@@ -324,4 +320,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChatScreen;
+export default GroupChatScreen;

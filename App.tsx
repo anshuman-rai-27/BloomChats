@@ -36,6 +36,9 @@ import { IntervalScreen } from './components/sessionVerification';
 import UserProfileComponent from './components/userProfile';
 import BillSplit from './components/billSplit';
 import DmCallPage from './components/callDm';
+import GroupChatScreen from './components/group_page';
+
+
 
 export type RootStackParamList = {
   CallPage:{email:string, groupId:Id<'groups'>, name:string};
@@ -50,8 +53,9 @@ export type RootStackParamList = {
   Username:{email:string};
   OtherDevice:{email:string};
   SessionVerification:{email:string};
-  Profile:{email:string};
-  BillSplit:{email:string};
+  Profile: { email: string };
+  BillSplit: { email: string };
+  GroupChatScreen: { email: string };
   DmCallPage:{fromId:Id<'users'>, name:string, email:string, toId:Id<'users'>, callId:Id<'callLogs'>}
 }
 
@@ -77,6 +81,7 @@ function App() {
           <Stack.Screen name="Username" component={UsernameComponent} />
           <Stack.Screen name="GroupChat" component={Chatbox}/>
           <Stack.Screen name="Profile" component={UserProfileComponent} />
+          <Stack.Screen name="GroupChatScreen" component={GroupChatScreen} />
           <Stack.Screen name="CallPage" component={CallPage}/>
           <Stack.Screen name="BillSplit" component={BillSplit} />
           <Stack.Screen name="DmCallPage" component={DmCallPage} />
