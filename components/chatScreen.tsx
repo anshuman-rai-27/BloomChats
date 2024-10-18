@@ -195,7 +195,7 @@ const ChatScreen = ({ route }: { route: RouteProp<any> }) => {
       {/* Bottom Navbar */}
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.navItem}>
-          <Icon name="home" size={20} color="#bbb" />
+          <Icon name="home" size={20} color="#DD651B" />
           <Text style={styles.navIcons}>Home</Text>
         </TouchableOpacity>
 
@@ -213,7 +213,9 @@ const ChatScreen = ({ route }: { route: RouteProp<any> }) => {
           <Text style={styles.navIcons}>Bill Split</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity style={styles.navItem} onPress={()=>{
+          navigation.navigate('Calls',{email:route.params!.email})
+        }}>
           <Icon name="phone-alt" size={20} color="#bbb" />
           <Text style={styles.navIcons}>Calls</Text>
         </TouchableOpacity>

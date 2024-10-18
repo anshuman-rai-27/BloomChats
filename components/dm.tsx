@@ -239,7 +239,16 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
         <StatusBar barStyle="light-content" />
 
         {/* Header Section */}
-        <View style={styles.header}>
+       
+          <View style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 20,
+            justifyContent: 'space-between',
+            width: '15%'
+        }}>
+             <View style={styles.header}>
           <TouchableOpacity onPress={() => {
             navigation.navigate('Chat', { email: fromUser?.email! });
           }} style={styles.backButton}>
@@ -256,15 +265,15 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
               style={styles.userImage}
             />
             <Text style={styles.userName}>{toUser?.name ?? toUser?.email}</Text>
-          </View>
-          <View style={{
+            </View>
+            <View style={{
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 10,
+            gap: 18,
             justifyContent: 'space-between',
             width: '15%'
-          }}>
+        }}>
             <TouchableOpacity
               style={{
               }}
@@ -280,11 +289,11 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
 
               }}
             >
-              <Icon style={{ color: !expire ? 'white' : 'gray', fontSize: 20 }} name="clock-rotate-left" />
+              <Icon style={{ color: !expire ? 'white' : '#DD651B', fontSize: 20 }} name="clock-rotate-left" />
             </TouchableOpacity>
 
             <TouchableOpacity style={{
-              paddingHorizontal: 10
+              
             }} onPress={() => {
               createCallLog();
             }}>
@@ -292,16 +301,17 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
               source={require('../assets/images/video_call.png')}
               style={styles.userImage}
             /> */}
-              <FontAwesomeIcon style={{ color: 'white', fontSize: 20 }} name="video-camera" />
+              <FontAwesomeIcon style={{ color: 'white', fontSize: 20}} name="video-camera" />
 
             </TouchableOpacity>
 
 
             <TouchableOpacity style={{}} onPress={toggleModal}>
-              <FontAwesomeIcon style={{ color: 'white', fontSize: 20 }} name="ellipsis-v" />
+              <FontAwesomeIcon style={{ color: 'white', fontSize: 20  }} name="ellipsis-v" />
             </TouchableOpacity>
           </View>
-        </View>
+          </View>
+          </View>
 
 
         <Modal transparent={true} visible={isModalVisible} animationType="slide">
@@ -418,14 +428,14 @@ const styles = StyleSheet.create({
   backButton: {
     paddingRight: 0,
     paddingTop: 2,
-    marginRight: -20,
+    marginRight: 0,
     justifyContent: 'center',
   },
   userInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginLeft: -35,
-    marginRight: 20,
+    marginLeft: 5,
+    marginRight: 160,
   },
   userImage: {
     width: 30,

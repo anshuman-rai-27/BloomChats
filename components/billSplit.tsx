@@ -15,13 +15,12 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome'; // Import FontAwesome icons
 import { api } from '../convex/_generated/api';
 import { useMutation, useQuery } from 'convex/react';
-import { RouteProp } from '@react-navigation/native';
+import { RouteProp, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { decodeBase64 } from 'tweetnacl-util';
 import { decryptSecretKey, encrypt } from '../utils';
 import { Id } from '../convex/_generated/dataModel';
 import { box } from "tweetnacl";
-
 const { width, height } = Dimensions.get('window');
 const ITEM_HEIGHT = 380; // Height for each list item
 const VISIBLE_ITEMS = 1; // Number of items visible in the scroll view
@@ -170,13 +169,16 @@ const BillSplit = ({ route }: { route: RouteProp<any> }) => {
     });
 
     return (
+    
+     
       <Animated.View style={[styles.item, { opacity, transform: [{ scale }] }]}>
         <Image
           source={{ uri: contact?.image || defaultUserIcon }}
           style={styles.userImage}
         />
         <Text style={styles.itemText}>{item.name}</Text>
-      </Animated.View>
+        </Animated.View>
+        
     );
   };
 
@@ -206,6 +208,7 @@ const BillSplit = ({ route }: { route: RouteProp<any> }) => {
 
       {step === 1 && (
         <>
+          
           <Text style={styles.header}>Split Bill</Text>
           <Text>Select Contacts</Text>
           <ScrollView>

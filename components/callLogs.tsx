@@ -23,12 +23,11 @@ import { RootStackParamList } from '../App';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Id } from '../convex/_generated/dataModel';
 
-
 const { width, height } = Dimensions.get('window');
 
 type chatScreenProp = NativeStackNavigationProp<RootStackParamList, "Chat">
 
-const GroupChatScreen = ({ route }: { route: RouteProp<any> }) => {
+const Calls = ({ route }: { route: RouteProp<any> }) => {
   const [chats, setChats] = useState<any[]>([]);
   const [friendChat, setFriendChat] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -174,13 +173,21 @@ const GroupChatScreen = ({ route }: { route: RouteProp<any> }) => {
       </View>
 
       {/* Chat List */}
-      <FlatList
+       <FlatList
         data={filteredChats}
         renderItem={renderChatItem}
         keyExtractor={(item) => item._id}
         contentContainerStyle={[styles.chatList, { paddingBottom: height * 0.2 }]}
       />
-     
+      <Text style={styles.greeting}>Direct Message</Text> 
+          
+      <FlatList
+        data={filteredFriendChat}
+        renderItem={renderFriendChatItem}
+        keyExtractor={(item) => item._id}
+        contentContainerStyle={[styles.chatList, { paddingBottom: height * 0.2 }]}
+      />
+
       {/* Floating Action Button */}
       <TouchableOpacity style={styles.fab} onPress={handleAddButtonPress}>
         <Icon name="plus" size={20} color="#fff" />
@@ -198,7 +205,7 @@ const GroupChatScreen = ({ route }: { route: RouteProp<any> }) => {
         <TouchableOpacity style={styles.navItem} onPress={()=>{
           navigation.navigate('GroupChatScreen',{email:route.params!.email})
         }}>
-          <Icon name="users" size={20} color="#DD651B" />
+          <Icon name="users" size={20} color="#bbb" />
           <Text style={styles.navIcons}>Groups</Text>
         </TouchableOpacity>
 
@@ -209,10 +216,8 @@ const GroupChatScreen = ({ route }: { route: RouteProp<any> }) => {
           <Text style={styles.navIcons}>Bill Split</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem} onPress={()=>{
-          navigation.navigate('Calls',{email:route.params!.email})
-        }}>
-          <Icon name="phone-alt" size={20} color="#bbb" />
+        <TouchableOpacity style={styles.navItem}>
+          <Icon name="phone-alt" size={20} color="#DD651B" />
           <Text style={styles.navIcons}>Calls</Text>
         </TouchableOpacity>
 
@@ -322,4 +327,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default GroupChatScreen;
+export default Calls;

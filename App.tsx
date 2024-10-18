@@ -37,6 +37,7 @@ import UserProfileComponent from './components/userProfile';
 import BillSplit from './components/billSplit';
 import DmCallPage from './components/callDm';
 import GroupChatScreen from './components/group_page';
+import Calls from './components/callLogs';
 
 
 
@@ -56,6 +57,7 @@ export type RootStackParamList = {
   Profile: { email: string };
   BillSplit: { email: string };
   GroupChatScreen: { email: string };
+  Calls: { email: string };
   DmCallPage:{fromId:Id<'users'>, name:string, email:string, toId:Id<'users'>, callId:Id<'callLogs'>}
 }
 
@@ -85,6 +87,7 @@ function App() {
           <Stack.Screen name="CallPage" component={CallPage}/>
           <Stack.Screen name="BillSplit" component={BillSplit} />
           <Stack.Screen name="DmCallPage" component={DmCallPage} />
+          <Stack.Screen name="Calls" component={Calls} />
         </Stack.Navigator>
       </NavigationContainer>
     </RootLayout>)
