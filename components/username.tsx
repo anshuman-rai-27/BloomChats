@@ -3,14 +3,9 @@ import { AuthComponent } from "./login"
 import { NavigationProp, RouteProp } from "@react-navigation/native";
 import { Dimensions, Image, TextInput, TouchableOpacity } from "react-native";
 import { View, Text } from "react-native";
-import { useAuthActions } from "@convex-dev/auth/react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAction, useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
-import { decodeBase64, encodeBase64 } from "tweetnacl-util";
-import { generateKeyPair } from "../utils";
 import { launchImageLibrary } from "react-native-image-picker";
-import { getUploadUrl, getUrluploadFile } from "../convex/message";
 
 const { height, width } = Dimensions.get('screen')
 
@@ -59,7 +54,16 @@ export const UsernameComponent = ({ navigation, route }: { navigation: Navigatio
         );
     };
     async function handleSubmit() {
-        if(!image)return;
+        if(!image){
+            await updateUser({
+                email:route.params!.email,
+                imgUrl:userImage,
+                name:username,
+                phone:phone
+            })    
+            navigation.navigate('Chat', {email:route.params!.email})
+            return;
+        }
         try{
         const file = await fetch(image.uri)
         const blob =await file.blob()

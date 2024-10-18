@@ -9,9 +9,6 @@ import {
   StatusBar,
   ImageBackground,
 } from 'react-native';
-import { generateKeyPair } from '../utils';
-import { encodeBase64 } from 'tweetnacl-util';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../convex/_generated/api';
 import { useAction, useMutation } from 'convex/react';
 import { NavigationProp, useNavigation } from '@react-navigation/native';

@@ -24,8 +24,9 @@ export const createGroup = mutation({
 })
 
 export const getGroupWithEmail = query({
-    args:{email:v.string()},
+    args:{email:v.optional(v.string())},
     handler: async (ctx, args) =>{
+        if(!args.email) return;
         const userId = await ctx.db.query('users').filter((q)=>q.eq(q.field('email'), args.email)).first();
         try{
             const data = await ctx.db.query('groupchats').filter((q)=>q.eq(q.field('userId'), userId!._id)).collect()

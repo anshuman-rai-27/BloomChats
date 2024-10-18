@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { AuthComponent } from "./login"
-import { NavigationProp, RouteProp } from "@react-navigation/native";
+import { NavigationProp, RouteProp, useNavigation } from "@react-navigation/native";
 import { Dimensions, TextInput, TouchableOpacity } from "react-native";
 import { View, Text } from "react-native";
 import { useAuthActions } from "@convex-dev/auth/react";
@@ -8,18 +8,24 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { encodeBase64 } from "tweetnacl-util";
-import { generateKeyPair } from "../utils";
+import { encryptSecretKey, generateKey, generateKeyPair } from "../utils";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../App";
 
 const height = Dimensions.get('screen').height
 const width = Dimensions.get('screen').width
 
-export const VerificationScreen = ({ navigation, route }: { navigation: NavigationProp<any>, route: RouteProp<any> }) => {
+type VerificationNavigationProp = NativeStackNavigationProp<RootStackParamList, "Verification">
+
+export const VerificationScreen = ({ route }: { route: RouteProp<any> }) => {
     const [code, setCode] = useState<string>("");
+    const navigation = useNavigation<VerificationNavigationProp>()
     const { signIn } = useAuthActions();
     const [err,setErr] = useState<string>("");
     
     const setPublicKey = useMutation(api.users.setPublicKey);
     const checkVerificationCode = useMutation(api.users.checkVerificationCode)
+    const createSession = useMutation(api.session.createSession);
     
     async function handleSubmit() {
         const email = route.params?.email
@@ -33,17 +39,22 @@ export const VerificationScreen = ({ navigation, route }: { navigation: Navigati
             try {
                 await signIn("password", { email: email, password: password, flow: "signIn" })
                 await AsyncStorage.setItem('email', email);
-                navigation.navigate('Chat', { email: email })
+                navigation.navigate('SessionVerification', { email: email })
             } catch (error) {
                 console.error(error);
             }
         } else {
             const userKeys = generateKeyPair();
+            const secretKey = generateKey();
             try {
                 await signIn("password", { email, password, flow: "signUp" })
-                // await AsyncStorage.setItem('privKey', encodeBase64(userKeys.secretKey));
+                const privkey = encodeBase64(userKeys.secretKey);
                 await AsyncStorage.setItem('email', email);
-                await AsyncStorage.setItem(email, encodeBase64(userKeys.secretKey));
+                const sessionId = await createSession({
+                    email:email,
+                    secret:encryptSecretKey(privkey, secretKey)
+                })
+                await AsyncStorage.setItem(email, JSON.stringify({sessionId:sessionId,privkey:secretKey}));
                 await setPublicKey({ email: email, publicKey: encodeBase64(userKeys.publicKey) });
                 navigation.navigate('Username', { email: email })
             } catch (error) {
@@ -62,6 +73,7 @@ export const VerificationScreen = ({ navigation, route }: { navigation: Navigati
                     paddingVertical: 10,
                     fontWeight: 900,
                     fontSize: 20,
+                    color:'white'
                 }}>Verification Code</Text>
                 <TextInput style={{
                     backgroundColor: 'rgba(51, 51, 51, 0.7)', // Transparent background
@@ -70,7 +82,7 @@ export const VerificationScreen = ({ navigation, route }: { navigation: Navigati
                     borderRadius: 10,
                     marginBottom: 20,
                     fontWeight: '900',
-                }} placeholder="Verification Code" value={code} onChangeText={setCode} keyboardType="number-pad" />
+                }} placeholderTextColor={'white'} placeholder="Verification Code" value={code} onChangeText={setCode} keyboardType="number-pad" />
                 <TouchableOpacity style={{
                     backgroundColor: '#DD651B',
                     opacity: 0.8,

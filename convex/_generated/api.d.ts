@@ -19,6 +19,7 @@ import type * as auth from "../auth.js";
 import type * as groups from "../groups.js";
 import type * as http from "../http.js";
 import type * as message from "../message.js";
+import type * as session from "../session.js";
 import type * as users from "../users.js";
 
 /**
@@ -34,6 +35,7 @@ declare const fullApi: ApiFromModules<{
   groups: typeof groups;
   http: typeof http;
   message: typeof message;
+  session: typeof session;
   users: typeof users;
 }>;
 export declare const api: FilterApi<

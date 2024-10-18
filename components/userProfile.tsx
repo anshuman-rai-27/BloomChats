@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -10,28 +10,71 @@ import {
   ImageBackground,
 } from 'react-native';
 import { launchImageLibrary, ImagePickerResponse, ImageLibraryOptions } from 'react-native-image-picker';
+import { api } from '../convex/_generated/api';
+import { useAction, useMutation, useQuery } from 'convex/react';
+import { RouteProp } from '@react-navigation/native';
 
 interface User {
   name: string;
   dp?: string; 
 }
 
-const UserProfileComponent: React.FC = () => {
-  const [user, setUser] = useState<User>({
-    name: '',
-    dp: undefined,
-  });
+function UserProfileComponent({route}:{route:RouteProp<any>}){
+  const [username, setUsername] = useState<string>("");
+  const [image, setImage] = useState<any>();
+  const [userImage, setUserImage] = useState<string>('https://via.placeholder.com/100');
 
-  const handleUpdateProfile = (updatedData: Partial<User>) => {
-    setUser((prevUser) => ({
-      ...prevUser,
-      ...updatedData,
-    }));
+  const getImage = useAction(api.message.getUrluploadFile)
+  const uploadImage = useAction(api.message.getUploadUrl)
+  const updateUser = useMutation(api.users.updateUser)
+  const user = useQuery(api.users.getUser,{
+    email:route.params!.email
+  })
+
+  useEffect(()=>{
+
+  },[])
+
+  const handleUpdateProfile = async () => {
+    if(!image){
+      await updateUser({
+        email:route.params!.email,
+        name:username
+      })
+      Alert.alert('Successfully updated your details');
+    }else{
+      try{
+        
+        const file = await fetch(image.uri)
+        
+        const blob = await file.blob()
+        const url = await uploadImage()
+        
+        const response = await fetch(url, {
+          method:'POST',
+          headers:{
+            'Content-Type':image.type
+          },
+          body:blob
+        })
+        const {storageId} = await response.json()
+        const storageUrl = await getImage({storageId})
+        await updateUser({
+          email:route.params!.email,
+          imgUrl:storageUrl!,
+          name:username ?? user?.name
+        })
+        Alert.alert('Successfully updated your details')
+      }catch(error){
+        console.error(error);
+        Alert.alert('There is an issue in the updating your details')
+      }
+    }
   };
 
   const handleLogout = () => {
+    
     Alert.alert('Logged out successfully');
-    // Perform your logout logic here
   };
 
   const handleImagePick = () => {
@@ -47,23 +90,14 @@ const UserProfileComponent: React.FC = () => {
         console.log('User cancelled image picker');
       } else if (response.errorCode) {
         console.log('ImagePicker Error: ', response.errorMessage);
-      } else {
-        const uri = response.assets?.[0]?.uri;
+      } else if(response.assets && response.assets.length > 0) {
+        setImage(response.assets[0]);
+        const uri = response.assets[0].uri;
         if (uri) {
-          handleUpdateProfile({ dp: uri });
+          setUserImage(uri)
         }
       }
     });
-  };
-
-  const handleSave = () => {
-    if (user.name.trim() === '') {
-      Alert.alert('Error', 'Name cannot be empty');
-      return;
-    }
-
-    handleUpdateProfile({ name: user.name });
-    Alert.alert('Profile updated successfully');
   };
 
   const handleBackPress = () => {
@@ -89,7 +123,7 @@ const UserProfileComponent: React.FC = () => {
         <View style={styles.imageContainer}>
           <Image
             source={{
-              uri: user.dp || 'https://via.placeholder.com/100',
+              uri: userImage || 'https://via.placeholder.com/100',
             }}
             style={styles.dp}
           />
@@ -101,17 +135,21 @@ const UserProfileComponent: React.FC = () => {
           </View>
         </View>
       </TouchableOpacity>
-
+      <View style={{
+        width:"100%"
+      }}>
       <Text style={styles.name}>Name</Text>
       <TextInput
         style={styles.input}
-        value={user.name}
-        onChangeText={(text) => handleUpdateProfile({ name: text })}
+        defaultValue={user?.name ?? username}
+        placeholderTextColor={'white'}
+        onChangeText={setUsername}
         placeholder="Enter your name"
       />
+      </View>
 
       {/* Styled Save button */}
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+      <TouchableOpacity style={styles.saveButton} onPress={handleUpdateProfile}>
         <Text style={styles.buttonText}>Save</Text>
       </TouchableOpacity>
 
@@ -141,7 +179,8 @@ const styles = StyleSheet.create({
     height: 30,
   },
   name: {
-    marginRight: 200,
+    // marginRight: 200,
+    marginLeft:5,
     fontWeight: 'bold',
     marginTop: 20,
     color:'#DD651B',
@@ -183,17 +222,14 @@ const styles = StyleSheet.create({
   },
   input: {
     marginTop: 20,
-    paddingLeft: 40,
     width: '100%',
     color: 'white',
-    paddingHorizontal:5,
+    paddingHorizontal:10,
     paddingVertical:10,
     marginBottom: 20,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.5)',
     borderRadius: 10,
-    
-
   },
   saveButton: {
     backgroundColor: '#DD651B',
