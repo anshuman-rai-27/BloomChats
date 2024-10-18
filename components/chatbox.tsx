@@ -112,7 +112,7 @@ const Chatbox = ({ route }: { route: RouteProp<any> }) => {
           </View>
 
           <TouchableOpacity style={styles.videoCallIcon} onPress={() => {
-            navigation.navigate('CallPage', { email: route.params!.email, groupId: route.params!.groupId, name: "" })
+            navigation.navigate('CallPage', { email: route.params!.email, groupId: route.params!.groupId, name: user?.name!})
           }}>
             <Image
               source={require('../assets/images/video_call.png')} // Replace with the user image path

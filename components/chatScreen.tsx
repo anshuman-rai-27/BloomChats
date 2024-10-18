@@ -34,8 +34,6 @@ const ChatScreen = ({ route }: { route: RouteProp<any> }) => {
   const navigation = useNavigation<chatScreenProp>();
   const removeFriend = useMutation(api.users.removeFriendShip)
   
-  
-  
   const friends = useQuery(api.users.getFriendShip, {
     fromEmail:route.params!.email
   })

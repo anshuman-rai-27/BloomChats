@@ -3700,6 +3700,7 @@ __metadata:
     react-native: 0.75.4
     react-native-async-storage: ^0.0.1
     react-native-device-info: ^13.1.0
+    react-native-document-picker: ^9.3.1
     react-native-dotenv: ^3.4.11
     react-native-encrypted-storage: ^4.0.3
     react-native-gesture-handler: ^2.20.0
@@ -9237,6 +9238,22 @@ __metadata:
   peerDependencies:
     react-native: "*"
   checksum: e05cd870981b8366bcb43f89d8565f123b1c3f727d399db03d7ac5e5cda6d06da3d326d06291e11d4920223dbd3db22631a50e2c3d58d8a8c62e196e59518e8e
+  languageName: node
+  linkType: hard
+
+"react-native-document-picker@npm:^9.3.1":
+  version: 9.3.1
+  resolution: "react-native-document-picker@npm:9.3.1"
+  dependencies:
+    invariant: ^2.2.4
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-windows: "*"
+  peerDependenciesMeta:
+    react-native-windows:
+      optional: true
+  checksum: 5979e4b93f15e0568ae70b70cc2304cd727f20939a58412d483517942df6d3cf3821319b3b7934bcaa2866ed1918ef9e8de9933ce6953209340abe3455403e0d
   languageName: node
   linkType: hard
 

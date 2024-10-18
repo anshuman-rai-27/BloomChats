@@ -30,9 +30,11 @@ import ZegoUIKitPrebuiltCallService, {
   ONE_ON_ONE_VIDEO_CALL_CONFIG,
   ZegoMenuBarButtonName,
 } from '@zegocloud/zego-uikit-prebuilt-call-rn';
+import { useMutation } from 'convex/react';
+import { api } from '../convex/_generated/api';
 // import KeyCenter from "./KeyCenter";
 
-export default function CallPage({navigation, route}) {
+export default function DmCallPage({navigation, route}) {
   const prebuiltRef = useRef();
   randomUserID = String(Math.floor(Math.random() * 100000));
 
@@ -42,7 +44,11 @@ export default function CallPage({navigation, route}) {
         console.log('CallPage cleanup on unmount');
     };
 }, []);
-  const groupId = route.params.groupId
+
+  const updateCall = useMutation(api.calllog.updateCallLog);
+  const fromId = route.params.fromId
+  const toId = route.params.toId
+  const callId = route.params.callId
   const email = route.params.email
   const name = route.params.name
 
@@ -55,7 +61,7 @@ export default function CallPage({navigation, route}) {
         appSign={'3601ef63bef061e250d607571df00dea5137a324c008768392e903c59f8ba28a'}
         userID={email}
         userName={name}
-        callID={groupId}
+        callID={callId}
 
         config={{
           // ...ONE_ON_ONE_VOICE_CALL_CONFIG,
@@ -73,7 +79,8 @@ export default function CallPage({navigation, route}) {
           onCallEnd: (callID, reason, duration) => {
             console.log('########CallPage onCallEnd');
             ZegoUIKitPrebuiltCallService.hangUp();
-            navigation.navigate('GroupChat', {groupId, email});
+            updateCall({callLogId:callId, status:"COMPLETED"})
+            navigation.navigate('DmChat', {fromId, toId});
           },
           timingConfig: {
             isDurationVisible: true,
@@ -91,14 +98,12 @@ export default function CallPage({navigation, route}) {
           },
           onWindowMinimized: () => {
             console.log('[Demo]CallPage onWindowMinimized');
-            navigation.navigate('GroupChat',{groupId, email});
+            navigation.navigate('DmChat',{fromId, toId});
           },
           onWindowMaximized: () => {
             console.log('[Demo]CallPage onWindowMaximized');
-            props.navigation.navigate('CallPage', {
-              userID: email,
-              userName: name ?? email,
-              callID: groupId,
+            props.navigation.navigate('DmCallPage', {
+              fromId,name,email,toId, callId
             });
           },
         }}
