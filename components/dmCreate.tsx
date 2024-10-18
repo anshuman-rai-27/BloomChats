@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, FlatList, Image, TouchableOpacity, StyleSheet, Dimensions, StatusBar, Alert } from 'react-native';
-import {  RouteProp, useNavigation } from '@react-navigation/native';
+import { RouteProp, useNavigation } from '@react-navigation/native';
 import { api } from '../convex/_generated/api';
-import {  useQuery } from 'convex/react';
+import { useQuery } from 'convex/react';
 import { RootStackParamList } from '../App';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 
 const { width, height } = Dimensions.get('window');
 
@@ -40,77 +41,63 @@ const sampleContacts = [
 
 type dmGroupNavigation = NativeStackNavigationProp<RootStackParamList, "DmCreate">
 
-export default function GroupComponent({route }: {  route: RouteProp<any> }) {
+export default function GroupComponent({ route }: { route: RouteProp<any> }) {
   const [groupName, setGroupName] = useState('');
   const navigation = useNavigation<dmGroupNavigation>();
   const [contacts, setContacts] = useState<any>(sampleContacts); 
   const [selectedContacts, setSelectedContacts] = useState<any[]>([]); 
   const [image, setImage] = useState<any>();
-  const [sampleUser, setSampleUser] = useState<any>([])
+  const [sampleUser, setSampleUser] = useState<any>([]);
   const user = useQuery(api.users.getUser, {
     email: route.params!.email
-  })
+  });
   const users = useQuery(api.users.getAllUser);
 
-  // const getImage = useAction(api.message.getUrluploadFile)
-  // const uploadImage = useAction(api.message.getUploadUrl)
-  // const createGroup = useMutation(api.groups.createGroup);
-  // const joinGroup = useMutation(api.groups.joinGroup);
-
-
-
-  // >>>>>>>>>> Setting Group Data
+  // Sample effect hooks to load users and contacts
   useEffect(() => {
-    setContacts(users)
-  }, [users])
-  useEffect(() => {
-    console.log(user)
-    setSampleUser(user)
-  }, [user])
+    setContacts(users);
+  }, [users]);
 
-  // ...............................................Group>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  // console.log(sampleUser)
+  useEffect(() => {
+    setSampleUser(user);
+  }, [user]);
+
   useEffect(() => {
     setSelectedContacts([sampleUser]);
   }, [sampleUser]);
 
   // Handle contact selection
   const handleSelectContact = (contact: any) => {
-    navigation.navigate('DmChat', {fromId:user!._id, toId:contact._id}) // Remove the selected contact from the contacts list
+    navigation.navigate('DmChat', { fromId: user!._id, toId: contact._id });
   };
-
-  // Handle removing selected contact
-  
-
-  // ...........................................................Group Cretion ........................
-  // Handle group creation
-  
 
   // Render contacts list
   const renderContact = ({ item }: { item: any }) => {
-    if(sampleUser._id===item._id){
-      return <TouchableOpacity></TouchableOpacity>; 
+    if (sampleUser._id === item._id) {
+      return <TouchableOpacity></TouchableOpacity>;
     }
     return (
       <TouchableOpacity style={styles.contactItem} onPress={() => handleSelectContact(item)}>
         <Image source={{ uri: item.image ?? 'https://via.placeholder.com/50' }} style={styles.avatar} />
         <Text style={styles.contactName}>{item.name ?? item.email}</Text>
       </TouchableOpacity>
-    )
+    );
   };
-
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <TouchableOpacity onPress={()=>{
-        navigation.navigate('GroupCreate', {email:route.params?.email})
+      <TouchableOpacity onPress={() => {
+        navigation.navigate('GroupCreate', { email: route.params?.email });
       }}>
-        <Text style={styles.title}>+ Create Group</Text>
+        <View style={styles.groups}>
+          <Icon name="users" size={20} color="#DD651B" />
+          <Text style={{ marginLeft: 8, color: '#bbb'}}> + Create New Group </Text>
+        </View>
       </TouchableOpacity>
 
       {/* Select Contacts */}
-      <Text style={styles.subtitle}>Select Contacts</Text>
+      <Text style={styles.subtitle}>Contacts</Text>
       <FlatList
         data={contacts}
         renderItem={renderContact}
@@ -130,12 +117,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
   },
+  groups: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 30,
+    marginBottom:50,
+  },
   title: {
     fontSize: 28,
-    color: '#fff',
     textAlign: 'center',
     marginBottom: 20,
-    fontWeight: '500',
+    fontWeight: '900',
   },
   subtitle: {
     fontSize: 18,

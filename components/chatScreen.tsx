@@ -155,9 +155,10 @@ const ChatScreen = ({ route }: { route: RouteProp<any> }) => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.greeting}>Chat</Text>
-        <TouchableOpacity>
-          <Icon name="bell" size={24} color="#fff" />
+        <Text style={styles.greeting}>BloomChats</Text>
+        <TouchableOpacity onPress={()=>{ navigation.navigate('Profile',{email:route.params!.email})
+        }} >
+          <Icon name="ellipsis-v" size={18} color="#fff"   />
         </TouchableOpacity>
       </View>
 
@@ -197,23 +198,32 @@ const ChatScreen = ({ route }: { route: RouteProp<any> }) => {
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.navItem}>
           <Icon name="home" size={20} color="#bbb" />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.navItem}>
-          <Icon name="phone" size={20} color="#bbb" />
+          <Text style={styles.navIcons}>Home</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.navItem} onPress={()=>{
-          navigation.navigate('Profile',{email:route.params!.email})
+          navigation.navigate('BillSplit',{email:route.params!.email})
         }}>
-          <Icon name="user" size={20} color="#bbb" />
+          <Icon name="users" size={20} color="#bbb" />
+          <Text style={styles.navIcons}>Groups</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.navItem} onPress={()=>{
           navigation.navigate('BillSplit',{email:route.params!.email})
         }}>
           <Icon name="money-bill-alt" size={20} color="#bbb" />
+          <Text style={styles.navIcons}>Bill Split</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity style={styles.navItem}>
+          <Icon name="phone-alt" size={20} color="#bbb" />
+          <Text style={styles.navIcons}>Calls</Text>
+        </TouchableOpacity>
+
+      
+
+       
+
       </View>
     </View>
   );
@@ -226,6 +236,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: Platform.OS === 'android' ? 40 : 20,
   },
+  navIcons: {
+    fontSize: 12,
+    fontWeight:'800',
+  },
+  
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -243,11 +258,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#1E1E1E',
     borderRadius: 25,
-    padding: 8,
+    paddingStart:2,
     marginBottom: 16,
   },
   searchIcon: {
-    marginRight: 8,
+    marginLeft: 18,
+    marginRight:5,
   },
   searchBar: {
     flex: 1,
