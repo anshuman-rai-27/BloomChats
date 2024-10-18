@@ -31,6 +31,10 @@ import ChatScreen from './components/chatScreen';
 import { VerificationScreen } from './components/verification';
 import { UsernameComponent } from './components/username';
 import { DmChatbox } from './components/dm';
+import OtherDevicesScreen from './components/otherDevices';
+import { IntervalScreen } from './components/sessionVerification';
+import UserProfileComponent from './components/userProfile';
+import BillSplit from './components/billSplit';
 
 export type RootStackParamList = {
   CallPage:{email:string, groupId:Id<'groups'>, name:string};
@@ -43,6 +47,10 @@ export type RootStackParamList = {
   GroupChat: { groupId: Id<'groups'>; email: string };
   GroupCreate: {email:string};
   Username:{email:string};
+  OtherDevice:{email:string};
+  SessionVerification:{email:string};
+  Profile:{email:string};
+  BillSplit:{email:string};
 }
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -57,6 +65,8 @@ function App() {
         }} initialRouteName='Login'>
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Register" component={Register} />
+          <Stack.Screen name="OtherDevice" component={OtherDevicesScreen} />
+          <Stack.Screen name="SessionVerification" component={IntervalScreen} />
           <Stack.Screen name="Chat" component={ChatScreen} />
           <Stack.Screen name="DmChat" component={DmChatbox} />
           <Stack.Screen name="DmCreate" component={DmCreate} />
@@ -64,7 +74,9 @@ function App() {
           <Stack.Screen name="Verification" component={VerificationScreen} />
           <Stack.Screen name="Username" component={UsernameComponent} />
           <Stack.Screen name="GroupChat" component={Chatbox}/>
+          <Stack.Screen name="Profile" component={UserProfileComponent} />
           <Stack.Screen name="CallPage" component={CallPage}/>
+          <Stack.Screen name="BillSplit" component={BillSplit} />
         </Stack.Navigator>
       </NavigationContainer>
     </RootLayout>)

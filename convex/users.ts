@@ -17,6 +17,19 @@ export const getAllUser = query({
     }
 })
 
+export const getAllUserWithPublicKey = query({
+    args:{},
+    handler: async (ctx,args)=>{
+        const users = await ctx.db.query('users').collect();
+        const usersWithPKey = []
+        for(let i= 0 ; i < users.length ; i++){
+            const publicKey = await ctx.db.query('userPublicKey').filter((q)=>q.eq(q.field('user'), users[i]._id)).first();
+            usersWithPKey.push({...users[i], publicKey:publicKey?.publicKey});
+        }
+        return usersWithPKey;
+    }
+})
+
 export const getUserByUserId = query({
     args:{userId:v.id('users')},
     handler:async(ctx,args)=>{
@@ -105,7 +118,7 @@ export const createVerificationCode = mutation({
 })
 
 export const updateUser = mutation({
-    args:{email:v.string(), imgUrl:v.string(), name:v.string(), phone:v.string()},
+    args:{email:v.string(), imgUrl:v.optional(v.string()), name:v.optional(v.string()), phone:v.optional(v.string())},
     handler:async(ctx,args)=>{
         const user = await ctx.db.query('users').filter((q)=>q.eq(q.field('email'), args.email)).first();
         await ctx.db.patch(user!._id, {

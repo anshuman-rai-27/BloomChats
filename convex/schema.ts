@@ -45,7 +45,7 @@ const schema = defineSchema({
         code:v.string()
     }),
     sessions:defineTable({
-        type:v.union(v.literal('TEMPORARY'), v.literal('PERMANT')),
+        type:v.union(v.literal('TEMPORARY'), v.literal('PERMANENT')),
         secret:v.string(),
         userId:v.string(),
         code:v.optional(v.string())

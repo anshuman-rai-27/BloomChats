@@ -17,7 +17,7 @@ import Icon from 'react-native-vector-icons/FontAwesome5';
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { NavigationProp, RouteProp, useNavigation } from '@react-navigation/native';
-import { useConvexAuth, useMutation, useQuery } from 'convex/react';
+import { useConvex, useConvexAuth, useMutation, useQuery } from 'convex/react';
 import { api } from '../convex/_generated/api';
 import { RootStackParamList } from '../App';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -33,6 +33,8 @@ const ChatScreen = ({ route }: { route: RouteProp<any> }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const navigation = useNavigation<chatScreenProp>();
   const removeFriend = useMutation(api.users.removeFriendShip)
+  
+  
   
   const friends = useQuery(api.users.getFriendShip, {
     fromEmail:route.params!.email
@@ -128,7 +130,7 @@ const ChatScreen = ({ route }: { route: RouteProp<any> }) => {
       }}
       style={styles.chatItem}
     >
-      <Image source={{ uri: item.avatar ?? "https://via.placeholder.com/50" }} style={styles.avatar} />
+      <Image source={{ uri: item.image ?? "https://via.placeholder.com/50" }} style={styles.avatar} />
       <View style={styles.chatDetails}>
         <Text style={styles.chatName}>{item.name}</Text>
       </View>
@@ -142,7 +144,7 @@ const ChatScreen = ({ route }: { route: RouteProp<any> }) => {
       }}
       style={styles.chatItem}
     >
-      <Image source={{ uri: item.avatar ?? "https://via.placeholder.com/50" }} style={styles.avatar} />
+      <Image source={{ uri: item.image ?? "https://via.placeholder.com/50" }} style={styles.avatar} />
       <View style={styles.chatDetails}>
         <Text style={styles.chatName}>{item.name ?? item.email}</Text>
       </View>
@@ -201,11 +203,15 @@ const ChatScreen = ({ route }: { route: RouteProp<any> }) => {
           <Icon name="phone" size={20} color="#bbb" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity style={styles.navItem} onPress={()=>{
+          navigation.navigate('Profile',{email:route.params!.email})
+        }}>
           <Icon name="user" size={20} color="#bbb" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity style={styles.navItem} onPress={()=>{
+          navigation.navigate('BillSplit',{email:route.params!.email})
+        }}>
           <Icon name="money-bill-alt" size={20} color="#bbb" />
         </TouchableOpacity>
       </View>

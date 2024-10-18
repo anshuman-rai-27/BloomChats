@@ -13,6 +13,14 @@ import {
   ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome'; // Import FontAwesome icons
+import { api } from '../convex/_generated/api';
+import { useMutation, useQuery } from 'convex/react';
+import { RouteProp } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { decodeBase64 } from 'tweetnacl-util';
+import { decryptSecretKey, encrypt } from '../utils';
+import { Id } from '../convex/_generated/dataModel';
+import { box } from "tweetnacl";
 
 const { width, height } = Dimensions.get('window');
 const ITEM_HEIGHT = 380; // Height for each list item
@@ -22,28 +30,24 @@ interface Amounts {
   [key: string]: number;
 }
 
-const BillSplit: React.FC = () => {
+const BillSplit = ({ route }: { route: RouteProp<any> }) => {
   const defaultUserIcon = 'https://via.placeholder.com/100';
-  const contacts: { name: string; image: string | null }[] = [
-    { name: 'John Doe1', image: null },
-    { name: 'Jane Smith1', image: null },
-    { name: 'Michael Johnson1', image: null },
-    { name: 'Emily Davis1', image: null },
-    { name: 'Michael Johnson2', image: null },
-    { name: 'Emily Davis2', image: null },
-    { name: 'Michael Johnson3', image: null },
-    { name: 'Emily Davis3', image: null },
-    { name: 'Michael Johnson4', image: null },
-    { name: 'Emily Davis4', image: null },
-    // ... More users
-  ];
+  const contacts = useQuery(api.users.getAllUserWithPublicKey)
+  const user = useQuery(api.users.getUser, {
+    email: route.params!.email
+  })
+  const sessions = useQuery(api.session.getSession, {
+    userId: user?._id
+  })
+  const createFriendship = useMutation(api.users.createFriendship);
+  const create = useMutation(api.message.createDmMessage);
 
   // Filter out duplicates based on name
-  const uniqueContacts = contacts.filter((contact, index, self) =>
+  const uniqueContacts = contacts?.filter((contact, index, self) =>
     index === self.findIndex((c) => c.name === contact.name)
   );
 
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [amounts, setAmounts] = useState<Amounts>({});
   const [totalAmount, setTotalAmount] = useState<number>(0);
@@ -51,8 +55,27 @@ const BillSplit: React.FC = () => {
   const [step, setStep] = useState<number>(1); // Track steps in UI
   const [expenseName, setExpenseName] = useState<string>(''); // Optional expense name
 
+  const [priv, setPriv] = useState<Uint8Array>();
+
   const scrollY = useRef(new Animated.Value(0)).current;
   const flatListRef = useRef<FlatList>(null);
+
+  useEffect(() => {
+    const initializePrivateKey = async () => {
+      try {
+        if (user?.email && sessions) {
+          const privd = JSON.parse((await AsyncStorage.getItem(user.email))!);
+          const session = sessions?.find((session) => session._id === privd.sessionId)
+          const privk = decryptSecretKey(session?.secret!, privd.privkey)
+          const privKey = decodeBase64(privk);
+          setPriv(privKey);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    initializePrivateKey();
+  }, [sessions, user])
 
   useEffect(() => {
     const listener = scrollY.addListener(({ value }) => {
@@ -64,7 +87,7 @@ const BillSplit: React.FC = () => {
     };
   }, [scrollY, selectedUsers.length]);
 
-  const toggleSelectUser = (user: string) => {
+  const toggleSelectUser = (user: any) => {
     setSelectedUsers((prevSelectedUsers) =>
       prevSelectedUsers.includes(user)
         ? prevSelectedUsers.filter((u) => u !== user)
@@ -72,13 +95,17 @@ const BillSplit: React.FC = () => {
     );
   };
 
-  const assignAmount = (user: string, amount: string) => {
-    const updatedAmounts = { ...amounts, [user]: parseFloat(amount) || 0 };
+  const assignAmount = (user: any, amount: string) => {
+    const updatedAmounts: { [x: string]: number } = { ...amounts, [user]: parseFloat(amount) || 0 };
     setAmounts(updatedAmounts);
-    const newTotal = Object.values(updatedAmounts).reduce(
-      (sum, value) => sum + (isNaN(value) ? 0 : value),
-      0
-    );
+    // const newTotal = Object.values(updatedAmounts).reduce(
+    //   (sum:number, value:number) => sum +value,
+    //   0
+    // );
+
+    const newTotal = Object.values(updatedAmounts).reduce((sum, value) => {
+      return sum + value;
+    }, 0)
     setTotalAmount(newTotal);
 
     // Check if amounts assigned to all users
@@ -107,15 +134,29 @@ const BillSplit: React.FC = () => {
     setStep(step === 3 ? 2 : 1);
   };
 
-  const finalizeAndSendAmounts = () => {
-    selectedUsers.forEach((user) => {
-      const userAmount = amounts[user];
-      Alert.alert(`Notification`, `Sent to ${user}: Your share is ₹${userAmount}. Total: ₹${totalAmount}`);
+  const sendMessage = async (message:string, fromId:Id<'users'>, toId:Id<'users'>, toPublicKey:string)=>{
+    await createFriendship({from:fromId, to:toId})
+    const sharedKey = box.before(decodeBase64(toPublicKey), priv!);
+    await create({
+      toUser:toId,
+      fromUser:fromId,
+      content:encrypt(sharedKey, message.trim())
+    })
+    return 
+  }
+
+
+  const finalizeAndSendAmounts = async () => {
+    selectedUsers.forEach(async (toUser) => {
+      const userAmount = amounts[toUser.name];
+      await sendMessage(`Your share is ₹${userAmount}, you need to pay to ${user?.name}`, user?._id!, toUser?._id, toUser?.publicKey )
+      Alert.alert(`Notification`, `Sent to ${toUser.name}: Your share is ₹${userAmount}. Total: ₹${totalAmount}`);
     });
   };
 
-  const renderItem = ({ item, index }: { item: string; index: number }) => {
-    const contact = uniqueContacts.find((c) => c.name === item);
+  const renderItem = ({ item,index}: { item: any, index:number}) => {
+    
+    const contact = uniqueContacts?.find((c) => c.name === item.name);
     const position = Animated.subtract(index * ITEM_HEIGHT, scrollY);
     const opacity = position.interpolate({
       inputRange: [-ITEM_HEIGHT, 0, ITEM_HEIGHT],
@@ -134,7 +175,7 @@ const BillSplit: React.FC = () => {
           source={{ uri: contact?.image || defaultUserIcon }}
           style={styles.userImage}
         />
-        <Text style={styles.itemText}>{item}</Text>
+        <Text style={styles.itemText}>{item.name}</Text>
       </Animated.View>
     );
   };
@@ -168,14 +209,14 @@ const BillSplit: React.FC = () => {
           <Text style={styles.header}>Split Bill</Text>
           <Text>Select Contacts</Text>
           <ScrollView>
-            {uniqueContacts.map((contact) => (
+            {uniqueContacts?.filter((contact) => contact._id !== user?._id).map((contact) => (
               <TouchableOpacity
                 key={contact.name}
                 style={[
                   styles.contactItem,
-                  selectedUsers.includes(contact.name) ? styles.selectedContact : null,
+                  selectedUsers.includes(contact) ? styles.selectedContact : null,
                 ]}
-                onPress={() => toggleSelectUser(contact.name)}
+                onPress={() => toggleSelectUser(contact)}
               >
                 <Image
                   source={{ uri: contact.image || defaultUserIcon }}
@@ -199,7 +240,7 @@ const BillSplit: React.FC = () => {
           <Animated.FlatList
             ref={flatListRef}
             data={selectedUsers} // No duplicate users
-            keyExtractor={(item, index) => `${item}-${index}`}
+            keyExtractor={(item,index) => item._id}
             renderItem={renderItem}
             showsVerticalScrollIndicator={false}
             bounces={false}
@@ -217,15 +258,21 @@ const BillSplit: React.FC = () => {
           </Text>
           <View style={styles.amountContainer}>
             <Text style={styles.activeUserText}>
-              Assign amount to {selectedUsers[activeIndex]}
+              Assign amount to {selectedUsers[activeIndex].name}
             </Text>
             <TextInput
               style={styles.input}
               placeholder="Enter amount"
               keyboardType="numeric"
               placeholderTextColor="#aaa"
-              value={amounts[selectedUsers[activeIndex]] ? amounts[selectedUsers[activeIndex]].toString() : ''}
-              onChangeText={(value) => assignAmount(selectedUsers[activeIndex], value)}
+              defaultValue={amounts[selectedUsers[activeIndex].name] ? amounts[selectedUsers[activeIndex].name].toString() : ''}
+              onChangeText={(value) => {
+                console.log(selectedUsers[activeIndex], activeIndex)
+                if(selectedUsers[activeIndex]){
+                  assignAmount(selectedUsers[activeIndex].name, value)
+                }
+              
+              }}
             />
           </View>
 
@@ -239,7 +286,7 @@ const BillSplit: React.FC = () => {
           <TouchableOpacity
             style={[styles.finalizeButton, isFinalizeEnabled && { backgroundColor: '#DD651B' }]}
             onPress={proceedToFinalList}
-            // disabled={!isFinalizeEnabled}
+          // disabled={!isFinalizeEnabled}
           >
             <Text style={styles.confirmButtonText}>Finalize</Text>
           </TouchableOpacity>
@@ -251,13 +298,15 @@ const BillSplit: React.FC = () => {
           <Text style={styles.header3}>Final Amounts</Text>
           <FlatList
             data={selectedUsers}
-            keyExtractor={(item) => item}
-            renderItem={({ item }) => (
+            keyExtractor={(item) => item._id}
+            renderItem={({ item }) => {
+              console.log(item, amounts)
+              return(
               <View style={styles.finalItem}>
-                <Text style={styles.finalUser}>{item}</Text>
-                <Text style={styles.finalAmount}>₹{amounts[item] || 0}</Text>
+                <Text style={styles.finalUser}>{item.name}</Text>
+                <Text style={styles.finalAmount}>₹{amounts[item.name] || 0}</Text>
               </View>
-            )}
+            )}}
           />
           <Text style={styles.totalText}>Total Amount: ₹{totalAmount}</Text>
           <TouchableOpacity style={styles.confirmButton} onPress={finalizeAndSendAmounts}>
@@ -287,7 +336,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#DD651B',
     marginBottom: 30,
-    marginTop:5,
+    marginTop: 5,
   },
   item: {
     justifyContent: 'center',
@@ -357,7 +406,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 10,
-    marginTop:20,
+    marginTop: 20,
     padding: 10,
     backgroundColor: '#1f1f1f',
     borderRadius: 8,
@@ -400,8 +449,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
     marginBottom: 20,
-    marginLeft:80,
-    
+    marginLeft: 80,
+
   },
 });
 

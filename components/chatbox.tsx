@@ -33,11 +33,9 @@ type groupChatScreenProp = NativeStackNavigationProp<RootStackParamList, "GroupC
 const Chatbox = ({ route }: { route: RouteProp<any> }) => {
   const user = useQuery(api.users.getUser, { email: route.params!.email });
   const navigation = useNavigation<groupChatScreenProp>()
-  const publicKeyRetrieve = useMutation(api.users.getPublicKey);
   const group = useQuery(api.groups.getGroup, { groupId: route.params!.groupId });
   const messages = useQuery(api.message.getMessageByGroupId, { groupId: route.params!.groupId });
   const create = useMutation(api.message.createMessage);
-  const [dm, setDm] = useState(false);
 
   // State to manage the current theme and message input
   const [selectedTheme, setSelectedTheme] = useState(themes[0]); // Default theme is now Orange
@@ -177,14 +175,14 @@ const Chatbox = ({ route }: { route: RouteProp<any> }) => {
             }}
           >
             {/* <Text style={styles.sendButtonText}>Send</Text> */}
-            <Icon name="clock-rotate-left" />
+            <Icon style={{color:'white'}} name="clock-rotate-left" />
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.sendButton, { backgroundColor: selectedTheme.myBubble }]}
             onPress={sendMessage}
           >
             {/* <Text style={styles.sendButtonText}>Send</Text> */}
-            <FontAwesomeIcon name="send" />
+            <FontAwesomeIcon style={{color:'white'}} name="send" />
           </TouchableOpacity>
         </View>
       </View>
@@ -371,6 +369,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginBottom: 15,
+    color:"white"
   },
   sendButtonText: {
     color: '#fff',

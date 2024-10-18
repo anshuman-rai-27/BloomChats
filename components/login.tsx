@@ -91,7 +91,7 @@ const Login = () => {
 export const AuthComponent = ({ children }: { children: ReactNode }) => {
   return (
     <ImageBackground
-      source={require('../assets/images/login_imagef1.jpg')} // Replace with your image path
+      source={require('../assets/images/login.png')} // Replace with your image path
       style={styles.background}
       resizeMode="cover"
     >

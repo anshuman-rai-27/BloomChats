@@ -14,14 +14,13 @@ import {
 } from 'react-native';
 import { RootStackParamList } from '../App';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { NavigationProp, RouteProp, useNavigation } from '@react-navigation/native';
-import { Id } from "../convex/_generated/dataModel";
+import { RouteProp, useNavigation } from '@react-navigation/native'
 import { api } from "../convex/_generated/api";
-import { useAction, useMutation, useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { decodeBase64 } from 'tweetnacl-util';
 import { box } from "tweetnacl";
-import { decrypt, encrypt } from '../utils';
+import { decrypt, decryptSecretKey, encrypt } from '../utils';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 
@@ -36,16 +35,20 @@ const themes = [
 type groupChatScreenProp = NativeStackNavigationProp<RootStackParamList, "GroupChat">;
 
 export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
+  const navigation = useNavigation<groupChatScreenProp>()
+
   const fromId = route.params!.fromId
   const toId = route.params!.toId
+  
   const fromUser = useQuery(api.users.getUserByUserId, { userId: fromId });
   const toUser = useQuery(api.users.getUserByUserId, { userId: toId });
-  const navigation = useNavigation<groupChatScreenProp>()
-  const publicKeyRetrieve = useMutation(api.users.getPublicKey);
-
   const messages = useQuery(api.message.getDmMessage, { fromUser: fromId, toUser: toId });
+  const publicKeyRetrieve = useMutation(api.users.getPublicKey);
   const create = useMutation(api.message.createDmMessage);
   const createFriendship = useMutation(api.users.createFriendship);
+  const sessions = useQuery(api.session.getSession,{
+    userId:fromId
+  })
 
   const [selectedTheme, setSelectedTheme] = useState(themes[0]);
   const [isModalVisible, setModalVisible] = useState(false);
@@ -58,9 +61,12 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
   useEffect(() => {
     const initializePrivateKeyAndSharedKey = async () => {
       try {
-        if (fromUser?.email && toUser?.email) {
-          const privd = await AsyncStorage.getItem(fromUser.email);
-          const privKey = decodeBase64(privd!);
+        if (fromUser?.email && toUser?.email && sessions) {
+          const privd = JSON.parse((await AsyncStorage.getItem(fromUser.email))!);
+          const session = sessions?.find((session)=>session._id===privd.sessionId!)
+          
+          const privk = decryptSecretKey(session?.secret!, privd.privkey)
+          const privKey = decodeBase64(privk);
           setPriv(privKey);
           const pkey = await publicKeyRetrieve({ email: toUser.email });
           const shared = box.before(decodeBase64(pkey), privKey);
@@ -71,7 +77,7 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
       }
     };
     initializePrivateKeyAndSharedKey();
-  }, [fromUser, toUser]);
+  }, [fromUser, toUser,sessions]);
   function decryptMessage(message: string) {
     if (sharedKey)
       return decrypt(sharedKey, message);
@@ -82,8 +88,8 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
     const time = new Date(Math.floor(item._creationTime)).toTimeString()
     if (item.content === "This message is Expired" || item.content === "Once seen") {
       return (
-        <View style={item.from === fromUser!._id ? [styles.myMessageBubble, { backgroundColor: selectedTheme.myBubble }] : [styles.theirMessageBubble, { backgroundColor: selectedTheme.theirBubble }]}>
-          <Text style={item.from === fromUser!._id ? styles.myMessageText : styles.theirMessageText}>
+        <View style={item.from === fromUser?._id ? [styles.myMessageBubble, { backgroundColor: selectedTheme.myBubble }] : [styles.theirMessageBubble, { backgroundColor: selectedTheme.theirBubble }]}>
+          <Text style={item.from === fromUser?._id ? styles.myMessageText : styles.theirMessageText}>
             {item.content}
             <Text style={{
               color: '',
@@ -104,8 +110,8 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
       )
     }
     return (
-      <View style={item.from === fromUser!._id ? [styles.myMessageBubble, { backgroundColor: selectedTheme.myBubble }] : [styles.theirMessageBubble, { backgroundColor: selectedTheme.theirBubble }]}>
-        <Text style={item.from === fromUser!._id ? styles.myMessageText : styles.theirMessageText}>
+      <View style={item.from === fromUser?._id ? [styles.myMessageBubble, { backgroundColor: selectedTheme.myBubble }] : [styles.theirMessageBubble, { backgroundColor: selectedTheme.theirBubble }]}>
+        <Text style={item.from === fromUser?._id ? styles.myMessageText : styles.theirMessageText}>
           {message}
           <Text style={{
             color: 'white',
@@ -236,17 +242,20 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
             style={[styles.sendButton, { backgroundColor: selectedTheme.myBubble }]}
             onPress={() => {
               setExpire(!expire)
+              setMessage(`Expiration is ${expire?"Enabled":"Disabled"}`)
+              sendMessage()
+              setMessage('')
             }}
           >
             {/* <Text style={styles.sendButtonText}>Send</Text> */}
-            <Icon name="clock-rotate-left" />
+            <Icon style={{color:'white'}} name="clock-rotate-left" />
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.sendButton, { backgroundColor: selectedTheme.myBubble }]}
             onPress={sendMessage}
           >
             {/* <Text style={styles.sendButtonText}>Send</Text> */}
-            <FontAwesomeIcon name="send" />
+            <FontAwesomeIcon style={{color:'white'}} name="send" />
           </TouchableOpacity>
         </View>
       </View>
@@ -431,8 +440,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginBottom: 15,
+    
   },
   sendButtonText: {
+
     color: '#fff',
     fontSize: 16,
   },
