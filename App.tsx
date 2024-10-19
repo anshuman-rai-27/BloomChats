@@ -38,7 +38,7 @@ import BillSplit from './components/billSplit';
 import DmCallPage from './components/callDm';
 import GroupChatScreen from './components/group_page';
 import Calls from './components/callLogs';
-
+import BotCreationPage from './components/createBot';
 
 
 export type RootStackParamList = {
@@ -58,6 +58,7 @@ export type RootStackParamList = {
   BillSplit: { email: string };
   GroupChatScreen: { email: string };
   Calls: { email: string };
+  BotcreationPage: { email: String };
   DmCallPage:{fromId:Id<'users'>, name:string, email:string, toId:Id<'users'>, callId:Id<'callLogs'>}
 }
 
@@ -88,6 +89,7 @@ function App() {
           <Stack.Screen name="BillSplit" component={BillSplit} />
           <Stack.Screen name="DmCallPage" component={DmCallPage} />
           <Stack.Screen name="Calls" component={Calls} />
+          <Stack.Screen name="BotcreationPage" component={BotCreationPage} />
         </Stack.Navigator>
       </NavigationContainer>
     </RootLayout>)

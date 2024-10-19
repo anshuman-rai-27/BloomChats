@@ -19,6 +19,7 @@ import { api } from "../convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import BotCreationPage from './createBot';
 
 const themes = [
   { id: 1, name: 'Orange Theme', backgroundImage: require('../assets/images/chat1.jpg'), myBubble: '#DD651B', theirBubble: '#333' },
@@ -120,6 +121,12 @@ const Chatbox = ({ route }: { route: RouteProp<any> }) => {
             />
 
           </TouchableOpacity>
+          <TouchableOpacity  onPress={()=>{
+          navigation.navigate('BotcreationPage',{email:route.params!.email})
+        }}>
+          <Icon name="robot" size={20} color="#fff" style={styles.botIcon} />
+         
+        </TouchableOpacity>
 
           {/* Three-Dot Button for Theme Selection */}
           <TouchableOpacity style={styles.threeDotButton} onPress={toggleModal}>
@@ -206,6 +213,10 @@ const styles = StyleSheet.create({
     marginRight: -70,
 
   },
+  botIcon: {
+    marginLeft: 10,
+    paddingLeft:20,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -228,6 +239,7 @@ const styles = StyleSheet.create({
     width: 30,
 
     height: 30,
+
     borderRadius: 20,
     marginRight: 10,
 
