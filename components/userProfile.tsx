@@ -156,7 +156,11 @@ function UserProfileComponent({route}:{route:RouteProp<any>}){
       <TouchableOpacity style={styles.saveButton} onPress={handleUpdateProfile}>
         <Text style={styles.buttonText}>Save</Text>
       </TouchableOpacity>
-      
+      <TouchableOpacity style={styles.saveButton} onPress={()=>{
+        navigation.navigate('OtherDevice',{email:route.params?.email})
+      }}>
+        Session Verification
+      </TouchableOpacity>
       {/* Styled Logout button */}
       <TouchableOpacity style={[styles.saveButton, styles.logoutButton]} onPress={handleLogout}>
         <Text style={styles.buttonText}>Logout !</Text>

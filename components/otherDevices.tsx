@@ -61,7 +61,7 @@ const OtherDevicesScreen = ({ route }: { route: RouteProp<any> }) => {
     },[])
 
     useEffect(()=>{
-        
+        setSessions(session!)
     },[session])
 
     const handleRemoveSession = async (id: Id<'sessions'>) => {
