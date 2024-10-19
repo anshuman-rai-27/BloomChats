@@ -2,6 +2,8 @@
 
 *Bloom Chats* is a secure and feature-rich messaging app built with React Native for cross-platform functionality. Designed to prioritize user privacy and security, Bloom Chats offers encrypted messaging, group chat management, bill-splitting capabilities, media sharing, and customizable chat templates.
 
+NOTE: For web, visit https://github.com/anshuman-rai-27/expoway
+
 ## Key Features
 
 ### 1. *End-to-End Encryption*
@@ -78,3 +80,4 @@ TweetNaCl: Asymmetric encryption to ensure the privacy of messages and shared me
 Convex: Backend service for handling real-time data and chat functionalities.
 ZUGO Cloud: High-quality, encrypted voice and video calling.
 Socket.IO: Real-time communication protocol for messaging and chat group formation.
+
