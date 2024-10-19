@@ -81,3 +81,4 @@ Convex: Backend service for handling real-time data and chat functionalities.
 ZUGO Cloud: High-quality, encrypted voice and video calling.
 Socket.IO: Real-time communication protocol for messaging and chat group formation.
 
+<img src="./WhatsApp Image 2024-10-19 at 21.02.29.jpeg"/>
