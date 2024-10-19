@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 
 export const createCallLog = mutation(
     {
@@ -25,6 +25,20 @@ export const createCallLog = mutation(
         }
     }
 )
+
+export const getCallLog= query({
+    args:{fromEmail:v.string()},
+    handler: async (ctx,args)=>{
+        const user = await ctx.db.query('users').filter((q)=>q.eq(q.field('email'), args.fromEmail)).first()
+        const callLogs =  await ctx.db.query('callLogs').filter((q)=>q.eq(q.field('from'),user!._id!)).collect();
+        const newCallLogs = []
+        for(let i= 0 ; i < callLogs.length ; i++){
+            const user = await ctx.db.get(callLogs[i].to);
+            newCallLogs.push({...callLogs[i], user})
+        }
+        return newCallLogs;
+    }
+})
 
 
 export const updateCallLog = mutation({

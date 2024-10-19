@@ -42,7 +42,9 @@ export const createDmMessage = mutation({
         isOneTime: v.optional(v.boolean()),
         time: v.optional(v.number()),
         type: v.optional(v.union(v.literal('FILE'), v.literal('MESSAGE'))),
-        fileUrl:v.optional(v.string())
+        fileUrl:v.optional(v.string()),
+        fileType:v.optional(v.string()),
+        fileName:v.optional(v.string())
     },
     handler: async (ctx, args) => {
         const messageContent = `${args.content}`

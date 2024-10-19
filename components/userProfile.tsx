@@ -12,18 +12,22 @@ import {
 import { launchImageLibrary, ImagePickerResponse, ImageLibraryOptions } from 'react-native-image-picker';
 import { api } from '../convex/_generated/api';
 import { useAction, useMutation, useQuery } from 'convex/react';
-import { RouteProp } from '@react-navigation/native';
+import { RouteProp, useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '../App';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 interface User {
   name: string;
   dp?: string; 
 }
 
+type userProfileScreenProp = NativeStackNavigationProp<RootStackParamList, "Profile">;
+
 function UserProfileComponent({route}:{route:RouteProp<any>}){
   const [username, setUsername] = useState<string>("");
   const [image, setImage] = useState<any>();
   const [userImage, setUserImage] = useState<string>('https://via.placeholder.com/100');
-
+  const navigation = useNavigation<userProfileScreenProp>();
   const getImage = useAction(api.message.getUrluploadFile)
   const uploadImage = useAction(api.message.getUploadUrl)
   const updateUser = useMutation(api.users.updateUser)
@@ -102,7 +106,7 @@ function UserProfileComponent({route}:{route:RouteProp<any>}){
 
   const handleBackPress = () => {
     // Implement your logic to navigate back or close the profile
-    Alert.alert('Back button pressed');
+    navigation.navigate('GroupChatScreen', {email:route.params!.email})
   };
 
   return (
@@ -152,7 +156,7 @@ function UserProfileComponent({route}:{route:RouteProp<any>}){
       <TouchableOpacity style={styles.saveButton} onPress={handleUpdateProfile}>
         <Text style={styles.buttonText}>Save</Text>
       </TouchableOpacity>
-
+      
       {/* Styled Logout button */}
       <TouchableOpacity style={[styles.saveButton, styles.logoutButton]} onPress={handleLogout}>
         <Text style={styles.buttonText}>Logout !</Text>

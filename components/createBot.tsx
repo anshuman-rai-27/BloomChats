@@ -15,8 +15,11 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { launchImageLibrary } from 'react-native-image-picker';
+import { useMutation } from 'convex/react';
+import { api } from '../convex/_generated/api';
+import { RouteProp } from '@react-navigation/native';
 
-const BotCreationPage: React.FC = () => {
+const BotCreationPage = ({route}:{route:RouteProp<any>}) => {
   const [step, setStep] = useState(1);
   const [botName, setBotName] = useState('');
   const [description, setDescription] = useState('');
@@ -25,6 +28,8 @@ const BotCreationPage: React.FC = () => {
   const [mediaFiles, setMediaFiles] = useState<string[]>(['']);
   const [links, setLinks] = useState<string[]>(['']);
   const [tags, setTags] = useState<string[]>(['']);
+  const createBot = useMutation(api.bot.createBot)
+  const createCommand = useMutation(api.bot.createCommand)
 
   const handleNextStep = () => {
     if (step === 1) {
@@ -42,7 +47,20 @@ const BotCreationPage: React.FC = () => {
     }
   };
 
-  const handleCreateBot = () => {
+  const handleCreateBot = async () => {
+    const botId = await createBot({
+      name:botName,
+      description:description,
+      groupId:route.params?.groupId
+    })
+    if(botId){
+    for(let i = 0 ; i < commands.length ; i++){
+      await createCommand({
+        command:commands[i],
+        action:links[i],
+        botId:botId!
+      })
+    }
     Alert.alert('Success', `Bot "${botName}" created successfully!`);
     setBotName('');
     setDescription('');
@@ -51,7 +69,7 @@ const BotCreationPage: React.FC = () => {
     setMediaFiles(['']);
     setLinks(['']);
     setTags(['']);
-    setStep(1);
+    setStep(1);}
   };
 
   const handleBackPress = () => {
@@ -86,21 +104,6 @@ const BotCreationPage: React.FC = () => {
     setActions(newActions);
   };
 
-  const handleMediaChange = async (index: number) => {
-    const result = await launchImageLibrary({
-      mediaType: 'mixed',
-      includeBase64: false,
-    });
-
-    if (result.assets && result.assets.length > 0 && result.assets[0].uri) {
-      const mediaUri = result.assets[0].uri;
-      const newMediaFiles = [...mediaFiles];
-      newMediaFiles[index] = mediaUri;
-      setMediaFiles(newMediaFiles);
-    } else {
-      console.log('No media selected or an error occurred');
-    }
-  };
 
   const handleLinkChange = (index: number, value: string) => {
     const newLinks = [...links];
@@ -176,42 +179,12 @@ const BotCreationPage: React.FC = () => {
                   placeholder="Enter command (e.g., /bot)"
                 />
                 <Text style={styles.label}>Action</Text>
-                <Picker
-                  selectedValue={actions[index]}
-                  style={styles.picker}
-                  onValueChange={value => handleActionChange(index, value)}
-                >
-                  <Picker.Item label="Select Action" value="" />
-                  <Picker.Item label="Add Media" value="add_media" />
-                  <Picker.Item label="Add Link" value="add_link" />
-                  <Picker.Item label="Add Message Tag" value="add_message_tag" />
-                </Picker>
-                {actions[index] === 'add_media' && (
-                  <TouchableOpacity
-                    style={styles.input}
-                    onPress={() => handleMediaChange(index)}
-                  >
-                    <Text style={styles.placeholderText}>
-                      {mediaFiles[index] ? 'Media Selected' : 'Add media file'}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-                {actions[index] === 'add_link' && (
                   <TextInput
                     style={styles.input}
                     value={links[index]}
                     onChangeText={value => handleLinkChange(index, value)}
-                    placeholder="Enter link"
+                    placeholder="Enter any kind of text"
                   />
-                )}
-                {actions[index] === 'add_message_tag' && (
-                  <TextInput
-                    style={styles.input}
-                    value={tags[index]}
-                    onChangeText={value => handleTagChange(index, value)}
-                    placeholder="Define tag"
-                  />
-                )}
               </View>
             ))}
             <TouchableOpacity style={styles.addButton} onPress={handleAddCommand}>
@@ -232,10 +205,7 @@ const BotCreationPage: React.FC = () => {
             <Text style={styles.summary2}>Commands:</Text>
             {commands.map((command, index) => (
               <Text key={index} style={styles.summary}>
-                {command} → {actions[index] || 'No action'}{' '}
-                {actions[index] === 'add_media' && `| Media: ${mediaFiles[index]}`}{' '}
-                {actions[index] === 'add_link' && `| Link: ${links[index]}`}{' '}
-                {actions[index] === 'add_message_tag' && `| Tag: ${tags[index]}`}
+                {command} → {links[index]}
               </Text>
             ))}
             <TouchableOpacity style={styles.createButton} onPress={handleCreateBot}>

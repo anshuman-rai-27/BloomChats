@@ -58,8 +58,8 @@ export type RootStackParamList = {
   BillSplit: { email: string };
   GroupChatScreen: { email: string };
   Calls: { email: string };
-  BotcreationPage: { email: String };
-  DmCallPage:{fromId:Id<'users'>, name:string, email:string, toId:Id<'users'>, callId:Id<'callLogs'>}
+  BotcreationPage: { groupId: Id<'groups'> };
+  DmCallPage:{fromId:Id<'users'>, name:string, email:string, toId:Id<'users'>, callId:Id<'callLogs'>, video:boolean}
 }
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

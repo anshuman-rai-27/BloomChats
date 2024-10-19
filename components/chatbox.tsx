@@ -46,6 +46,7 @@ const Chatbox = ({ route }: { route: RouteProp<any> }) => {
   const [receiveUser, setReceiveUser] = useState<any>();
   const [sharedKey, setSharedKey] = useState<Uint8Array>();
   const [expire, setExpire] = useState<boolean>(false);
+  const commands = useQuery(api.bot.getCommandsByGroupId,{groupId:route.params!.groupId})
 
   const renderMessage = ({ item }: { item: any }) => {
     const time = new Date(Math.floor(item._creationTime)).toTimeString()
@@ -69,10 +70,20 @@ const Chatbox = ({ route }: { route: RouteProp<any> }) => {
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
-
   // Send message function
   const sendMessage = async () => {
     if (message.trim()) {
+      if(message[0]==='/'){
+        const command = commands?.find((cmd)=>cmd.command===message);
+        await create({
+          groupId:route.params!.groupId,
+          from:user!._id,
+          isExpiry:expire,
+          content:command!.action.trim()
+        })
+        setMessage('')
+        return;
+      }
       await create({
         groupId: route.params!.groupId,
         from: user!._id,
@@ -122,7 +133,7 @@ const Chatbox = ({ route }: { route: RouteProp<any> }) => {
 
           </TouchableOpacity>
           <TouchableOpacity  onPress={()=>{
-          navigation.navigate('BotcreationPage',{email:route.params!.email})
+          navigation.navigate('BotcreationPage',{groupId:group?.data?.groupInfo?._id!})
         }}>
           <Icon name="robot" size={20} color="#fff" style={styles.botIcon} />
          

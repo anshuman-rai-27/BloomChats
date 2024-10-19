@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,8 @@ import {
   Pressable,
   TextInput,
   Alert,
+  Linking,
+  Button,
 } from 'react-native';
 import { RootStackParamList } from '../App';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -25,6 +27,7 @@ import { decrypt, decryptSecretKey, encrypt } from '../utils';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import DocumentPicker from 'react-native-document-picker';
+import { ImageLibraryOptions, ImagePickerResponse, launchImageLibrary } from 'react-native-image-picker';
 
 const themes = [
   { id: 1, name: 'Orange Theme', backgroundImage: require('../assets/images/chat1.jpg'), myBubble: '#DD651B', theirBubble: '#333' },
@@ -97,9 +100,52 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
       return decrypt(sharedKey, message);
   }
 
+  const OpenURLButton = ({url, children}: {url:string, children:string}) => {
+    console.log(url)
+    const handlePress = useCallback(async () => {
+      Linking.openURL(url)
+    }, [url]);
+  
+    return <Button title={children} onPress={handlePress} />;
+  };
 
   const renderMessage = ({ item }: { item: any }) => {
     const time = new Date(Math.floor(item._creationTime)).toTimeString()
+    if(item.type === "FILE"){
+      const message = decryptMessage(item.content);
+    if (!message && !item.fileUrl) {
+      return (
+        <View></View>
+      )
+    }
+    return (
+      <View style={item.from === fromUser?._id ? [styles.myMessageBubble, { backgroundColor: selectedTheme.myBubble }] : [styles.theirMessageBubble, { backgroundColor: selectedTheme.theirBubble }]}>
+        <View style={{
+          display:'flex',
+          flexDirection:'row',
+          alignItems:'center',
+          gap:10
+        }}>
+          <Icon name="file" style={{
+            fontSize:40
+          }}/>
+          <Text>{'File'}</Text>
+          <OpenURLButton url={decryptMessage(item.fileUrl)}>Link</OpenURLButton>
+        </View>
+        <Text style={item.from === fromUser?._id ? styles.myMessageText : styles.theirMessageText}>
+          {message}
+          <Text style={{
+            color: 'white',
+            paddingHorizontal: 2,
+            fontSize: 8,
+            marginLeft: 'auto'
+          }}>
+            {time.substring(0, time.lastIndexOf(':'))}
+          </Text>
+        </Text>
+      </View>)  
+    }
+    
     if (item.content === "This message is Expired" || item.content === "Once seen") {
       return (
         <View style={item.from === fromUser?._id ? [styles.myMessageBubble, { backgroundColor: selectedTheme.myBubble }] : [styles.theirMessageBubble, { backgroundColor: selectedTheme.theirBubble }]}>
@@ -152,7 +198,6 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
     await createFriendship({ from: fromUser?._id!, to: toUser?._id! })
     setFriend(true);
   }
-
   const sendMessage = async () => {
     if (!friend) {
       await checkFriendShip();
@@ -171,7 +216,6 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
     }
     setMessage('');
   };
-
   const sendFile = async () => {
     if (!friend) {
       await checkFriendShip();
@@ -197,34 +241,35 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
         isExpiry: expire,
         content: encrypt(sharedKey, messageContent.trim()),
         time: expiryTime,
-        fileUrl: storageUrl!,
+        fileUrl: encrypt(sharedKey,storageUrl!),
         type: "FILE"
       });
     }
+    setFile(undefined);
+    setMessage('');
   }
 
   const handleFileUpload = async () => {
-    try {
-      const file = await DocumentPicker.pick({
-        type: [DocumentPicker.types.allFiles],
-      });
-      setFile(file[0])
-      Alert.alert('File selected', file[0].name!);
-    } catch (err) {
-      if (DocumentPicker.isCancel(err)) {
-        console.log('User cancelled the file picker');
-      } else {
-        console.error('Error:', err);
-      }
-    }
-  };
 
-  const createCallLog = async () => {
+    launchImageLibrary({} as ImageLibraryOptions, (response: ImagePickerResponse) => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.errorCode) {
+        console.log('ImagePicker Error: ', response.errorMessage);
+      } else if(response.assets && response.assets.length > 0) {
+        setFile(response.assets[0]);
+      }
+    });
+  };
+  const createCallLog = async (value:boolean) => {
     const id = await createCall({
       from: fromUser?._id!,
       to: toUser?._id!
     })
-    navigation.navigate('DmCallPage', { fromId: fromId, name: fromUser?.name!, email: fromUser?.email!, toId: toId, callId: id })
+    console.log(id,toUser?.name)
+    
+    // await sendMessageD(`Your call url:${'https://192.168.1.34'}/video?roomID=${id}&username=${toUser?.name}&userID=${toUser?._id}`);
+    navigation.navigate('DmCallPage', { fromId: fromId, name: fromUser?.name!, email: fromUser?.email!, toId: toId, callId: id, video:value })
   }
   const handleExpiry = async () => {
     setExpire(!expire)
@@ -295,14 +340,16 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
             <TouchableOpacity style={{
               
             }} onPress={() => {
-              createCallLog();
+              createCallLog(true);
             }}>
-              {/* <Image
-              source={require('../assets/images/video_call.png')}
-              style={styles.userImage}
-            /> */}
               <FontAwesomeIcon style={{ color: 'white', fontSize: 20}} name="video-camera" />
-
+            </TouchableOpacity>
+            <TouchableOpacity style={{
+              
+            }} onPress={() => {
+              createCallLog(false);
+            }}>
+              <FontAwesomeIcon style={{ color: 'white', fontSize: 20}} name="phone" />
             </TouchableOpacity>
 
 
@@ -371,7 +418,7 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
         }}>
           <Text style={{
             color: 'white'
-          }}>File Selected: {file.name}</Text>
+          }}>File Selected: {file.fileName}</Text>
           <TouchableOpacity onPress={()=>{
             setFile(undefined);
           }}>
@@ -395,7 +442,7 @@ export const DmChatbox = ({ route }: { route: RouteProp<any> }) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.sendButton, { backgroundColor: selectedTheme.myBubble }]}
-            onPress={sendMessage}
+            onPress={file?sendFile:sendMessage}
           >
             {/* <Text style={styles.sendButtonText}>Send</Text> */}
             <FontAwesomeIcon style={{ color: 'white' }} name="send" />

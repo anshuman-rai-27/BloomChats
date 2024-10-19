@@ -51,6 +51,7 @@ export default function DmCallPage({navigation, route}) {
   const callId = route.params.callId
   const email = route.params.email
   const name = route.params.name
+  const video = route.params.video
 
 
   return (
@@ -66,7 +67,7 @@ export default function DmCallPage({navigation, route}) {
         config={{
           // ...ONE_ON_ONE_VOICE_CALL_CONFIG,
           ...ONE_ON_ONE_VIDEO_CALL_CONFIG,
-
+          turnOnCameraWhenJoining:video,
           avatarBuilder: ({ userInfo }) => {
             return <View style={{ width: '100%', height: '100%' }}>
               <Image

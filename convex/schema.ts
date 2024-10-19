@@ -19,6 +19,10 @@ const schema = defineSchema({
         isOneTime:v.optional(v.boolean()),
         isExpiry:v.optional(v.boolean()),
         isEdited:v.optional(v.boolean()),
+        type:v.optional(v.union(v.literal('FILE'), v.literal('MESSAGE'))),
+        fileUrl:v.optional(v.string()),
+        fileType:v.optional(v.string()),
+        fileName:v.optional(v.string()),
         seen:v.optional(v.boolean()),
     }),
     friend:defineTable({
@@ -34,6 +38,7 @@ const schema = defineSchema({
         isEdited:v.optional(v.boolean()),
         type:v.optional(v.union(v.literal('FILE'), v.literal('MESSAGE'))),
         fileUrl:v.optional(v.string()),
+        fileType:v.optional(v.string()),
         seen:v.optional(v.boolean())
     }),
     callLogs:defineTable({
@@ -60,6 +65,16 @@ const schema = defineSchema({
         avatar:v.optional(v.string()),
         expiry:v.optional(v.string()),
         isExpiry:v.optional(v.boolean())
+    }),
+    bots:defineTable({
+        name:v.string(),
+        description:v.optional(v.string()),
+        groupId:v.id('groups')
+    }),
+    commands:defineTable({
+        command:v.string(),
+        action:v.string(),
+        botId:v.id('bots')
     })
 })
 export default schema;

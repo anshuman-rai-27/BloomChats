@@ -33,55 +33,19 @@ const Calls = ({ route }: { route: RouteProp<any> }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const navigation = useNavigation<chatScreenProp>();
   const removeFriend = useMutation(api.users.removeFriendShip)
-  
-  const friends = useQuery(api.users.getFriendShip, {
-    fromEmail:route.params!.email
-  })
   const user = useQuery(api.users.getUser,{
     email:route.params!.email
   })
-  const group = useQuery(api.groups.getGroupWithEmail,{
-    email:route.params!.email
+  const group = useQuery(api.calllog.getCallLog,{
+    fromEmail:route.params!.email
   })
-  
+  useEffect(()=>{
+    if(group)
+      setChats(group)
+  },[group])
   const filteredChats = chats.filter((chat: any) =>
-    chat.name.toLowerCase().includes(searchQuery.toLowerCase())
+    chat.user.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  const filteredFriendChat = friendChat.filter((chat: any) =>
-    chat.name?.toLowerCase().includes(searchQuery.toLowerCase())??chat.email.toLowerCase().includes(searchQuery.toLowerCase()) 
-  );
-  
-
-  const deleteChat = (id: Id<'groups'>) => {
-    setChats((prev: any) => prev.filter((chat: any) => chat._id !== id));
-    
-  };
-  const deleteFriendChat = async (id: Id<'users'>) => {
-    setFriendChat((prev: any) => prev.filter((chat: any) => chat._id !== id));
-    await removeFriend({from:user?._id!, to:id})
-    
-  };
-
-  const handleLongPress = (id: Id<'groups'>) => {
-    Alert.alert(
-      "Delete Chat",
-      "Are you sure you want to delete this chat?",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Delete", onPress: () => deleteChat(id), style: "destructive" }
-      ]
-    );
-  };
-  const handleFriendLongPress = (id: Id<'users'>) => {
-    Alert.alert(
-      "Delete Chat",
-      "Are you sure you want to delete this chat?",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Delete", onPress: () => deleteFriendChat(id), style: "destructive" }
-      ]
-    );
-  };
 
   // Animation for the add button
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -113,38 +77,15 @@ const Calls = ({ route }: { route: RouteProp<any> }) => {
       useNativeDriver: true,
     }).start();
   }, []);
-  useEffect(()=>{
-    setChats(group?.data ?? [])
-  },[group])
-  useEffect(()=>{
-    setFriendChat(friends ?? [])
-  },[friends])
 
   const renderChatItem = ({ item }: { item: any }) => (
     <TouchableOpacity
-      onLongPress={() => handleLongPress(item._id)}
-      onPress={() => {
-        navigation.navigate('GroupChat', { groupId: item._id, email: route.params?.email });
-      }}
       style={styles.chatItem}
     >
       <Image source={{ uri: item.image ?? "https://via.placeholder.com/50" }} style={styles.avatar} />
       <View style={styles.chatDetails}>
-        <Text style={styles.chatName}>{item.name}</Text>
-      </View>
-    </TouchableOpacity>
-  );
-  const renderFriendChatItem = ({ item }: { item: any }) => (
-    <TouchableOpacity
-      onLongPress={() => handleFriendLongPress(item._id)}
-      onPress={() => {
-        navigation.navigate('DmChat', { toId: item._id, fromId:user?._id! });
-      }}
-      style={styles.chatItem}
-    >
-      <Image source={{ uri: item.image ?? "https://via.placeholder.com/50" }} style={styles.avatar} />
-      <View style={styles.chatDetails}>
-        <Text style={styles.chatName}>{item.name ?? item.email}</Text>
+        <Text style={styles.chatName}>{item.user.name ?? item.user.email}</Text>
+        <Text style={{...styles.chatName, fontSize:10}}>{new Date(item._creationTime).toDateString()} {new Date(item._creationTime).toTimeString()}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -176,14 +117,6 @@ const Calls = ({ route }: { route: RouteProp<any> }) => {
        <FlatList
         data={filteredChats}
         renderItem={renderChatItem}
-        keyExtractor={(item) => item._id}
-        contentContainerStyle={[styles.chatList, { paddingBottom: height * 0.2 }]}
-      />
-      <Text style={styles.greeting}>Direct Message</Text> 
-          
-      <FlatList
-        data={filteredFriendChat}
-        renderItem={renderFriendChatItem}
         keyExtractor={(item) => item._id}
         contentContainerStyle={[styles.chatList, { paddingBottom: height * 0.2 }]}
       />
