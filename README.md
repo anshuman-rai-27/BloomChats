@@ -2,7 +2,7 @@
 
 *Bloom Chats* is a secure and feature-rich messaging app built with React Native for cross-platform functionality. Designed to prioritize user privacy and security, Bloom Chats offers encrypted messaging, group chat management, bill-splitting capabilities, media sharing, and customizable chat templates.
 
-NOTE: For web, visit https://github.com/anshuman-rai-27/expoway
+NOTE: For web testing use this expo version of this project, visit https://github.com/anshuman-rai-27/expoway
 
 ## Key Features
 
