@@ -1,5 +1,3 @@
-Here’s a modified version of your README that includes a **demo video at the top**, just below the project title and before the project description:
-
 ---
 
 # Bloom Chats
@@ -90,5 +88,3 @@ After installation, you can:
 <img src="./WhatsApp Image 2024-10-19 at 21.02.29.jpeg" alt="Bloom Chats Screenshot"/>
 
 ---
-
-Replace `YOUR_DEMO_VIDEO_LINK` with your actual YouTube or demo video URL. Let me know if you'd like a badge or embedded video instead of a link.
