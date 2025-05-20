@@ -1,84 +1,94 @@
+Here’s a modified version of your README that includes a **demo video at the top**, just below the project title and before the project description:
+
+---
+
 # Bloom Chats
+
+🎥 **[Watch the Demo Video]([https://www.youtube.com/watch?v=YOUR_DEMO_VIDEO_LINK](https://drive.google.com/file/d/13sL1TaxCm5SQjWfPPJT04DAg6hHHE8Lg/view?usp=sharing))**
+
+> *A quick walkthrough of Bloom Chats' core features and real-time messaging in action.*
+
+---
 
 *Bloom Chats* is a secure and feature-rich messaging app built with React Native for cross-platform functionality. Designed to prioritize user privacy and security, Bloom Chats offers encrypted messaging, group chat management, bill-splitting capabilities, media sharing, and customizable chat templates.
 
-NOTE: For web testing use this expo version of this project, visit https://github.com/anshuman-rai-27/expoway
+**NOTE:** For web testing use this Expo version of this project: [https://github.com/anshuman-rai-27/expoway](https://github.com/anshuman-rai-27/expoway)
 
 ## Key Features
 
 ### 1. *End-to-End Encryption*
-   - *Private Direct Messages (DMs):* All direct messages are encrypted using *TweetNaCl* for asymmetric encryption, ensuring secure, private communication between users.
-   - *Media Sharing Encryption:* Photos shared within chats are encrypted, providing additional protection for media content.
+
+* **Private Direct Messages (DMs):** All direct messages are encrypted using *TweetNaCl* for asymmetric encryption.
+* **Media Sharing Encryption:** Photos shared within chats are encrypted for privacy.
 
 ### 2. *Group Chats*
-   - *Group Formation:* Users can easily create and manage group chats.
-   - *Custom Group Bot:* Automate group moderation with custom commands (e.g., /info to share group information with new users).
-   - *Disappearing Messages:* Option for self-destructing messages in both direct messages and groups.
+
+* Create and manage group chats.
+* Built-in **Group Bot** for commands like `/info`.
+* **Disappearing Messages** support.
 
 ### 3. *Bill Splitting*
-   - *Group Bill Splitting:* Users can split bills in group chats, automatically sending amounts to selected users, making shared expenses easier to manage.
+
+* Split bills inside group chats and auto-notify involved users.
 
 ### 4. *Customizable Message Templates*
-   - Personalize chat experiences with custom message templates, which adapt to user preferences for more efficient communication.
+
+* Adapt message formatting to match user communication style.
 
 ### 5. *Photo Sharing*
-   - *Encrypted Photo Sharing:* Users can share photos securely, thanks to robust encryption to protect the content from unauthorized access.
+
+* Secure, encrypted image sharing.
 
 ### 6. *Audio & Video Calls*
-   - *ZUGO Cloud Integration:* Secure audio and video calls are supported, utilizing *ZUGO Cloud’s* highly encrypted services to maintain privacy in real-time communication.
+
+* Powered by *ZUGO Cloud* for private and secure real-time communication.
 
 ### 7. *Multiple Sessions*
-   - Users can log in to the same account across multiple devices, maintaining synchronization and security for all active sessions.
+
+* Login and sync across multiple devices securely.
 
 ### 8. *Multiple Authentication Systems*
-   - Offers multiple authentication methods (e.g., password, biometric login) for secure access to user accounts.
+
+* Includes password and biometric authentication.
 
 ### 9. *Message Time Stamping*
-   - Each message is timestamped, allowing users to keep track of when messages were sent and received.
+
+* Track when messages are sent/received.
 
 ## Tech Stack
 
-- *React Native:* Cross-platform app development for both iOS and Android.
-- *TweetNaCl:* Asymmetric encryption for securing direct messages and photos.
-- *Convex:* Backend service for real-time communication and data storage.
-- *ZUGO Cloud:* Encrypted audio and video calling services.
-- *Socket.IO:* Real-time messaging support.
+* **React Native** – Cross-platform development.
+* **TweetNaCl** – Encryption for DMs and media.
+* **Convex** – Backend for real-time chat.
+* **ZUGO Cloud** – Secure audio/video calls.
+* **Socket.IO** – Real-time communication.
 
 ## Installation
 
-To set up *Bloom Chats*, follow these steps:
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Edantuti/bloomchats.git
-   ```
-Install dependencies:
-
-bash
-Copy code
+```bash
+git clone https://github.com/Edantuti/bloomchats.git
 cd bloomchats
 npm install
-Run the app:
-
-bash
-Copy code
 npm start
+```
+
 Follow platform-specific instructions to build for iOS or Android.
 
-Usage
-After installation, you can use Bloom Chats to:
+## Usage
 
-Send secure, encrypted direct messages.
-Create and manage group chats.
-Split bills within group chats.
-Share encrypted photos with ease.
-Conduct secure audio and video calls.
-Use custom message templates to streamline communication.
-Technologies Used
-React Native: For building cross-platform applications.
-TweetNaCl: Asymmetric encryption to ensure the privacy of messages and shared media.
-Convex: Backend service for handling real-time data and chat functionalities.
-ZUGO Cloud: High-quality, encrypted voice and video calling.
-Socket.IO: Real-time communication protocol for messaging and chat group formation.
+After installation, you can:
 
-<img src="./WhatsApp Image 2024-10-19 at 21.02.29.jpeg"/>
+* Send secure direct messages.
+* Manage group chats and bots.
+* Split bills within groups.
+* Share encrypted images.
+* Make encrypted audio/video calls.
+* Use custom message templates.
+
+---
+
+<img src="./WhatsApp Image 2024-10-19 at 21.02.29.jpeg" alt="Bloom Chats Screenshot"/>
+
+---
+
+Replace `YOUR_DEMO_VIDEO_LINK` with your actual YouTube or demo video URL. Let me know if you'd like a badge or embedded video instead of a link.
