@@ -2,7 +2,7 @@
 
 # Bloom Chats
 
-🎥 **[Watch the Demo Video]([https://www.youtube.com/watch?v=YOUR_DEMO_VIDEO_LINK](https://drive.google.com/file/d/13sL1TaxCm5SQjWfPPJT04DAg6hHHE8Lg/view?usp=sharing))**
+🎥 **[Watch the Demo Video](https://drive.google.com/file/d/13sL1TaxCm5SQjWfPPJT04DAg6hHHE8Lg/view?usp=sharing)**
 
 > *A quick walkthrough of Bloom Chats' core features and real-time messaging in action.*
 
